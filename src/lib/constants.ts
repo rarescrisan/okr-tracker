@@ -1,0 +1,88 @@
+export const COLORS = {
+  // Primary palette (Asana-inspired soft colors)
+  primary: {
+    coral: '#f06a6a',
+    orange: '#f1bd6c',
+    yellow: '#f8df72',
+    green: '#5da283',
+    teal: '#4ecbc4',
+    blue: '#4573d2',
+    purple: '#aa62e3',
+    pink: '#f9aaef',
+  },
+
+  // Neutral palette
+  neutral: {
+    background: '#f6f8f9',
+    surface: '#ffffff',
+    border: '#e8ecee',
+    divider: '#edeef0',
+    textPrimary: '#1e1f21',
+    textSecondary: '#6d6e6f',
+    textTertiary: '#9ca0a4',
+  },
+
+  // Status colors
+  status: {
+    notStarted: '#9ca0a4',
+    inProgress: '#4573d2',
+    blocked: '#f06a6a',
+    completed: '#5da283',
+    onHold: '#f1bd6c',
+  },
+
+  // Priority colors
+  priority: {
+    P0: '#f06a6a',
+    P1: '#f1bd6c',
+    P2: '#4573d2',
+    P3: '#9ca0a4',
+  },
+
+  // Department colors (for department sections)
+  departments: [
+    '#4573d2',
+    '#5da283',
+    '#aa62e3',
+    '#f06a6a',
+    '#4ecbc4',
+    '#f1bd6c',
+    '#f8df72',
+    '#f9aaef',
+    '#6c8ebf',
+    '#e88c6a',
+    '#7bc9a3',
+  ],
+} as const;
+
+export const STATUS_OPTIONS = [
+  { value: 'not_started', label: 'Not Started', color: COLORS.status.notStarted },
+  { value: 'in_progress', label: 'In Progress', color: COLORS.status.inProgress },
+  { value: 'blocked', label: 'Blocked', color: COLORS.status.blocked },
+  { value: 'completed', label: 'Completed', color: COLORS.status.completed },
+] as const;
+
+export const PROJECT_STATUS_OPTIONS = [
+  { value: 'not_started', label: 'Not Started', color: COLORS.status.notStarted },
+  { value: 'in_progress', label: 'In Progress', color: COLORS.status.inProgress },
+  { value: 'completed', label: 'Completed', color: COLORS.status.completed },
+  { value: 'on_hold', label: 'On Hold', color: COLORS.status.onHold },
+] as const;
+
+export const PRIORITY_OPTIONS = [
+  { value: 'P0', label: 'P0 - Critical', color: COLORS.priority.P0 },
+  { value: 'P1', label: 'P1 - High', color: COLORS.priority.P1 },
+  { value: 'P2', label: 'P2 - Medium', color: COLORS.priority.P2 },
+  { value: 'P3', label: 'P3 - Low', color: COLORS.priority.P3 },
+] as const;
+
+export const UNIT_TYPE_OPTIONS = [
+  { value: 'number', label: 'Number' },
+  { value: 'currency', label: 'Currency ($)' },
+  { value: 'percentage', label: 'Percentage (%)' },
+] as const;
+
+export type StatusValue = typeof STATUS_OPTIONS[number]['value'];
+export type ProjectStatusValue = typeof PROJECT_STATUS_OPTIONS[number]['value'];
+export type PriorityValue = typeof PRIORITY_OPTIONS[number]['value'];
+export type UnitTypeValue = typeof UNIT_TYPE_OPTIONS[number]['value'];

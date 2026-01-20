@@ -1,0 +1,117 @@
+import { type ClassValue, clsx } from 'clsx';
+
+// Simple cn function without tailwind-merge for now
+export function cn(...inputs: ClassValue[]) {
+  return clsx(inputs);
+}
+
+// Format date for display
+export function formatDisplayDate(date: string | null | undefined): string {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+// Format date for input fields
+export function formatInputDate(date: string | null | undefined): string {
+  if (!date) return '';
+  return date.split('T')[0];
+}
+
+// Calculate progress percentage
+export function calculateProgress(current: number, target: number): number {
+  if (target === 0) return 0;
+  const progress = (current / target) * 100;
+  return Math.min(Math.round(progress), 100);
+}
+
+// Format number based on unit type
+export function formatValue(
+  value: number | null | undefined,
+  unitType: 'number' | 'currency' | 'percentage',
+  label?: string | null
+): string {
+  if (value === null || value === undefined) return '-';
+
+  switch (unitType) {
+    case 'currency':
+      return `$${value.toLocaleString()}${label ? ` ${label}` : ''}`;
+    case 'percentage':
+      return `${value}%${label ? ` ${label}` : ''}`;
+    default:
+      return `${value.toLocaleString()}${label ? ` ${label}` : ''}`;
+  }
+}
+
+// Get initials from name
+export function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+// Generate a random color from department colors
+export function getRandomDepartmentColor(index: number): string {
+  const colors = [
+    '#4573d2', '#5da283', '#aa62e3',
+    '#f06a6a', '#4ecbc4', '#f1bd6c'
+  ];
+  return colors[index % colors.length];
+}
+
+// Debounce function
+export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+// Generate date range for Gantt chart
+export function generateDateRange(startDate: Date, endDate: Date): Date[] {
+  const dates: Date[] = [];
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
+// Calculate position and width for Gantt bars
+export function calculateGanttPosition(
+  itemStart: string | null,
+  itemEnd: string | null,
+  viewStart: Date,
+  viewEnd: Date,
+  totalWidth: number
+): { left: number; width: number } | null {
+  if (!itemStart || !itemEnd) return null;
+
+  const start = new Date(itemStart);
+  const end = new Date(itemEnd);
+  const viewDuration = viewEnd.getTime() - viewStart.getTime();
+
+  if (end < viewStart || start > viewEnd) return null;
+
+  const clampedStart = start < viewStart ? viewStart : start;
+  const clampedEnd = end > viewEnd ? viewEnd : end;
+
+  const left = ((clampedStart.getTime() - viewStart.getTime()) / viewDuration) * totalWidth;
+  const width = ((clampedEnd.getTime() - clampedStart.getTime()) / viewDuration) * totalWidth;
+
+  return { left: Math.max(0, left), width: Math.max(20, width) };
+}
