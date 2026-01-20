@@ -1,4 +1,7 @@
-import { Pool, QueryResult } from 'pg';
+import { Pool, QueryResultRow, QueryResult } from 'pg';
+
+// Get database name from environment variable, default to 'novo-okr'
+const dbName = process.env.DB_NAME || 'novo-okr';
 
 // PostgreSQL connection pool
 const pool = new Pool({
@@ -6,7 +9,7 @@ const pool = new Pool({
   port: 5432,
   user: 'postgres',
   password: 'pJsI8kvxE8qj5wpj',
-  database: 'novo-okr',
+  database: dbName,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000, // 10 seconds
@@ -17,7 +20,7 @@ const pool = new Pool({
 
 // Log connection
 pool.on('connect', () => {
-  console.log('Connected to PostgreSQL database: novo-okr');
+  console.log(`Connected to PostgreSQL database: ${dbName}`);
 });
 
 pool.on('error', (err) => {
@@ -30,20 +33,20 @@ export function getPool(): Pool {
 }
 
 // Query helper - executes a query and returns all rows
-export async function query<T = Record<string, unknown>>(
+export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: (string | number | boolean | null | undefined)[]
 ): Promise<T[]> {
-  const result: QueryResult<T> = await pool.query(text, params);
+  const result = await pool.query<T>(text, params);
   return result.rows;
 }
 
 // Query helper - executes a query and returns first row or undefined
-export async function queryOne<T = Record<string, unknown>>(
+export async function queryOne<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: (string | number | boolean | null | undefined)[]
 ): Promise<T | undefined> {
-  const result: QueryResult<T> = await pool.query(text, params);
+  const result = await pool.query<T>(text, params);
   return result.rows[0];
 }
 

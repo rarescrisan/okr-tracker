@@ -2,13 +2,16 @@ import { Pool } from 'pg';
 import path from 'path';
 import fs from 'fs';
 
+// Get database name from environment variable, default to 'novo-okr'
+const dbName = process.env.DB_NAME || 'novo-okr';
+
 // PostgreSQL connection
 const pool = new Pool({
   host: '104.154.167.98',
   port: 5432,
   user: 'postgres',
   password: 'pJsI8kvxE8qj5wpj',
-  database: 'novo-okr',
+  database: dbName,
   connectionTimeoutMillis: 10000,
   ssl: {
     rejectUnauthorized: false,
@@ -91,7 +94,7 @@ async function runSeedData(): Promise<void> {
 
 async function main(): Promise<void> {
   try {
-    console.log('Connecting to PostgreSQL database: novo-okr');
+    console.log(`Connecting to PostgreSQL database: ${dbName}`);
 
     // Create migrations tracking table
     await createMigrationsTable();
@@ -124,7 +127,7 @@ async function main(): Promise<void> {
 // Force seed command
 async function forceSeed(): Promise<void> {
   try {
-    console.log('Connecting to PostgreSQL database: novo-okr');
+    console.log(`Connecting to PostgreSQL database: ${dbName}`);
 
     // Create migrations tracking table
     await createMigrationsTable();
