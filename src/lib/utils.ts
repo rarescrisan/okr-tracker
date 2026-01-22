@@ -5,14 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-// Format date for display
+// Format date for display (dd/mm/yyyy)
 export function formatDisplayDate(date: string | null | undefined): string {
   if (!date) return '-';
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 // Format date for input fields

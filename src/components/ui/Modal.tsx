@@ -10,6 +10,7 @@ export interface ModalProps {
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   footer?: ReactNode;
+  maxHeight?: number;
 }
 
 const sizeClasses = {
@@ -19,7 +20,7 @@ const sizeClasses = {
   xl: 'max-w-xl',
 };
 
-export function Modal({ isOpen, onClose, title, children, size = 'md', footer }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, size = 'md', footer, maxHeight }: ModalProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -46,13 +47,14 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
       />
       <div
         className={cn(
-          'relative w-full mx-4 bg-white rounded-lg shadow-xl',
+          'relative w-full mx-4 bg-white rounded-lg shadow-xl flex flex-col',
           'animate-in fade-in zoom-in-95 duration-200',
           sizeClasses[size]
         )}
+        style={maxHeight ? { maxHeight: `${maxHeight}px` } : undefined}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8ecee]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8ecee] shrink-0">
             <h2 className="text-lg font-semibold text-[#1e1f21]">{title}</h2>
             <button
               onClick={onClose}
@@ -64,9 +66,9 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
             </button>
           </div>
         )}
-        <div className="px-6 py-4">{children}</div>
+        <div className={cn('px-6 py-4', maxHeight && 'overflow-y-auto flex-1')}>{children}</div>
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e8ecee] bg-[#f6f8f9] rounded-b-lg">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e8ecee] bg-[#f6f8f9] rounded-b-lg shrink-0">
             {footer}
           </div>
         )}

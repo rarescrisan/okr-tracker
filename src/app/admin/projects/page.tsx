@@ -5,7 +5,7 @@ import { Button, Card, Modal, Input, Textarea, Select, Badge, Avatar, ProgressBa
 import { PageHeader } from '@/src/components/layout';
 import { Project, ProjectTask, User, Objective, Department } from '@/src/types';
 import { PRIORITY_OPTIONS, PROJECT_STATUS_OPTIONS, STATUS_OPTIONS } from '@/src/lib/constants';
-import { formatDisplayDate } from '@/src/lib/utils';
+import { formatDisplayDate, formatInputDate } from '@/src/lib/utils';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -21,7 +21,6 @@ export default function ProjectsPage() {
   const [workingGroupSearch, setWorkingGroupSearch] = useState('');
   const [projectForm, setProjectForm] = useState({
     name: '',
-    description: '',
     department_id: '',
     objective_id: '',
     dri_user_id: '',
@@ -98,15 +97,14 @@ export default function ProjectsPage() {
       setEditingProject(project);
       setProjectForm({
         name: project.name,
-        description: project.description || '',
         department_id: project.department_id?.toString() || '',
         objective_id: project.objective_id?.toString() || '',
         dri_user_id: project.dri_user_id?.toString() || '',
         working_group_ids: project.working_group?.map(u => u.id) || [],
         priority: project.priority,
         status: project.status,
-        start_date: project.start_date || '',
-        end_date: project.end_date || '',
+        start_date: formatInputDate(project.start_date),
+        end_date: formatInputDate(project.end_date),
         progress_percentage: project.progress_percentage.toString(),
         document_link: project.document_link || '',
       });
@@ -114,7 +112,6 @@ export default function ProjectsPage() {
       setEditingProject(null);
       setProjectForm({
         name: '',
-        description: '',
         department_id: '',
         objective_id: '',
         dri_user_id: '',
@@ -187,8 +184,8 @@ export default function ProjectsPage() {
         description: task.description || '',
         assignee_user_id: task.assignee_user_id?.toString() || '',
         status: task.status,
-        start_date: task.start_date || '',
-        end_date: task.end_date || '',
+        start_date: formatInputDate(task.start_date),
+        end_date: formatInputDate(task.end_date),
         document_link: task.document_link || '',
       });
     } else {
@@ -612,6 +609,7 @@ export default function ProjectsPage() {
         onClose={() => setProjectModalOpen(false)}
         title={editingProject ? 'Edit Project' : 'Add Project'}
         size="lg"
+        maxHeight={700}
         footer={
           <>
             <Button variant="secondary" onClick={() => setProjectModalOpen(false)}>Cancel</Button>
@@ -628,12 +626,6 @@ export default function ProjectsPage() {
             onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
             placeholder="Enter project name"
             required
-          />
-          <Textarea
-            label="Description"
-            value={projectForm.description}
-            onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-            placeholder="Optional description"
           />
           <div className="grid grid-cols-2 gap-4">
             <Select
