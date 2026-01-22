@@ -1,6 +1,7 @@
 'use client';
 
 import { cn, getInitials } from '@/src/lib/utils';
+import { COLORS } from '@/src/lib/constants';
 import { HTMLAttributes, forwardRef } from 'react';
 
 export interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
@@ -16,17 +17,12 @@ const sizeClasses = {
   lg: 'w-12 h-12 text-base',
 };
 
-const colors = [
-  '#4573d2', '#5da283', '#aa62e3',
-  '#f06a6a', '#4ecbc4', '#f1bd6c',
-];
-
 function getColorFromName(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return colors[Math.abs(hash) % colors.length];
+  return COLORS.avatars[Math.abs(hash) % COLORS.avatars.length];
 }
 
 const Avatar = forwardRef<HTMLDivElement, AvatarProps>(

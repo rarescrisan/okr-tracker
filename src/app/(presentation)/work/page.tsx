@@ -210,6 +210,18 @@ export default function WorkTracker() {
                                 {(project as unknown as { objective_code: string }).objective_code}
                               </Badge>
                             )}
+                            {project.document_link && (
+                              <a
+                                href={project.document_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors flex-shrink-0"
+                                title="View Document"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                1-pager
+                              </a>
+                            )}
                           </div>
                           {project.description && (
                             <p className="text-sm text-[#6d6e6f] truncate">{project.description}</p>
@@ -367,6 +379,18 @@ export default function WorkTracker() {
                             <Badge variant="outline" className="flex-shrink-0">
                               {(project as unknown as { objective_code: string }).objective_code}
                             </Badge>
+                          )}
+                          {project.document_link && (
+                            <a
+                              href={project.document_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors flex-shrink-0"
+                              title="View Document"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              1-pager
+                            </a>
                           )}
                         </div>
                       </div>

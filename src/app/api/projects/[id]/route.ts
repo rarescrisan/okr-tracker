@@ -145,7 +145,8 @@ export async function PUT(
     return NextResponse.json({ data: project });
   } catch (error) {
     console.error('Error updating project:', error);
-    return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: `Failed to update project: ${errorMessage}` }, { status: 500 });
   }
 }
 

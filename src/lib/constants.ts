@@ -53,6 +53,40 @@ export const COLORS = {
     '#e88c6a',
     '#7bc9a3',
   ],
+
+  // User avatar colors (expanded palette)
+  avatars: [
+    '#4573d2', // Blue
+    '#5da283', // Green
+    '#aa62e3', // Purple
+    '#f06a6a', // Coral
+    '#4ecbc4', // Teal
+    '#f1bd6c', // Orange
+    '#e57373', // Light Red
+    '#64b5f6', // Light Blue
+    '#81c784', // Light Green
+    '#ba68c8', // Light Purple
+    '#ffb74d', // Amber
+    '#4db6ac', // Cyan
+    '#7986cb', // Indigo
+    '#a1887f', // Brown
+    '#90a4ae', // Blue Grey
+    '#ff8a65', // Deep Orange
+    '#aed581', // Light Lime
+    '#4dd0e1', // Light Cyan
+    '#9575cd', // Deep Purple
+    '#f06292', // Pink
+    '#dce775', // Lime
+    '#26a69a', // Teal Dark
+    '#5c6bc0', // Indigo Dark
+    '#8d6e63', // Brown Dark
+    '#78909c', // Blue Grey Dark
+    '#ef5350', // Red
+    '#66bb6a', // Green Medium
+    '#42a5f5', // Blue Medium
+    '#ab47bc', // Purple Medium
+    '#ffa726', // Orange Medium
+  ],
 } as const;
 
 export const STATUS_OPTIONS = [

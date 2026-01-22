@@ -139,7 +139,7 @@ export default function ProjectsPage() {
       const url = editingProject ? `/api/projects/${editingProject.id}` : '/api/projects';
       const method = editingProject ? 'PUT' : 'POST';
 
-      await fetch(url, {
+      const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -152,10 +152,16 @@ export default function ProjectsPage() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save project');
+      }
+
       await fetchData();
       setProjectModalOpen(false);
     } catch (error) {
       console.error('Error saving project:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save project');
     } finally {
       setSaving(false);
     }
@@ -334,12 +340,24 @@ export default function ProjectsPage() {
 
                           <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
 
-                          <div className="flex-1">
+                          <div className="flex-1 flex items-center gap-2">
                             <span className="font-medium text-[#1e1f21]">{project.name}</span>
                             {project.objective && (
-                              <span className="ml-2 text-sm text-[#6d6e6f]">
+                              <span className="text-sm text-[#6d6e6f]">
                                 ({(project as unknown as { objective_code: string }).objective_code})
                               </span>
+                            )}
+                            {project.document_link && (
+                              <a
+                                href={project.document_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                                title="View Document"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                1-pager
+                              </a>
                             )}
                           </div>
 
@@ -534,8 +552,20 @@ export default function ProjectsPage() {
 
                         <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
 
-                        <div className="flex-1">
+                        <div className="flex-1 flex items-center gap-2">
                           <span className="font-medium text-[#1e1f21]">{project.name}</span>
+                          {project.document_link && (
+                            <a
+                              href={project.document_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                              title="View Document"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              1-pager
+                            </a>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-6">
