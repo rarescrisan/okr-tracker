@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, Card, Modal, Input, Textarea, Select, Badge, Avatar, ProgressBar } from '@/src/components/ui';
+import { Button, Card, Modal, Input, Select, Badge, Avatar, ProgressBar } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
 import { Project, ProjectTask, User, Objective, Department } from '@/src/types';
 import { PRIORITY_OPTIONS, PROJECT_STATUS_OPTIONS, STATUS_OPTIONS } from '@/src/lib/constants';
@@ -40,7 +40,6 @@ export default function ProjectsPage() {
   const [taskProjectId, setTaskProjectId] = useState<number | null>(null);
   const [taskForm, setTaskForm] = useState({
     title: '',
-    description: '',
     assignee_user_id: '',
     status: 'not_started',
     start_date: '',
@@ -145,6 +144,8 @@ export default function ProjectsPage() {
           objective_id: projectForm.objective_id ? parseInt(projectForm.objective_id) : null,
           dri_user_id: projectForm.dri_user_id ? parseInt(projectForm.dri_user_id) : null,
           progress_percentage: parseInt(projectForm.progress_percentage),
+          start_date: projectForm.start_date || null,
+          end_date: projectForm.end_date || null,
           document_link: projectForm.document_link || null,
         }),
       });
@@ -181,7 +182,6 @@ export default function ProjectsPage() {
       setEditingTask(task);
       setTaskForm({
         title: task.title,
-        description: task.description || '',
         assignee_user_id: task.assignee_user_id?.toString() || '',
         status: task.status,
         start_date: formatInputDate(task.start_date),
@@ -192,7 +192,6 @@ export default function ProjectsPage() {
       setEditingTask(null);
       setTaskForm({
         title: '',
-        description: '',
         assignee_user_id: '',
         status: 'not_started',
         start_date: '',
@@ -220,6 +219,8 @@ export default function ProjectsPage() {
         body: JSON.stringify({
           ...taskForm,
           assignee_user_id: taskForm.assignee_user_id ? parseInt(taskForm.assignee_user_id) : null,
+          start_date: taskForm.start_date || null,
+          end_date: taskForm.end_date || null,
           document_link: taskForm.document_link || null,
         }),
       });
@@ -459,8 +460,23 @@ export default function ProjectsPage() {
                                   </svg>
                                 </button>
                               </div>
-                              <div className="flex-1 min-w-0">
+                              <div className="flex-1 min-w-0 flex items-center gap-2">
                                 <span className="text-sm text-[#1e1f21]">{task.title}</span>
+                                {task.document_link && (
+                                  <a
+                                    href={task.document_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                                    title="View Document"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    doc
+                                  </a>
+                                )}
                               </div>
                               <div className="flex items-center gap-6">
                                 <div className="w-36">
@@ -482,20 +498,6 @@ export default function ProjectsPage() {
                                   </Badge>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  {task.document_link && (
-                                    <a
-                                      href={task.document_link}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="p-1.5 text-[#4573d2] hover:bg-[#e8f0fe] rounded transition-colors"
-                                      title="View Document"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                      </svg>
-                                    </a>
-                                  )}
                                   <Button variant="ghost" size="sm" onClick={() => openTaskModal(project.id, task)} title="Edit">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -853,12 +855,6 @@ export default function ProjectsPage() {
             onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
             placeholder="Enter task title"
             required
-          />
-          <Textarea
-            label="Description"
-            value={taskForm.description}
-            onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
-            placeholder="Optional description"
           />
           <div className="grid grid-cols-2 gap-4">
             <Select

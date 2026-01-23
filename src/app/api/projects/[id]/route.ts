@@ -111,7 +111,13 @@ export async function PUT(
     for (const field of fields) {
       if (body[field] !== undefined) {
         updates.push(`${field} = $${paramIndex++}`);
-        values.push(body[field] as string | number | null ?? null);
+        // Convert empty strings to null for date fields
+        const value = body[field];
+        if ((field === 'start_date' || field === 'end_date') && value === '') {
+          values.push(null);
+        } else {
+          values.push(value as string | number | null ?? null);
+        }
       }
     }
 

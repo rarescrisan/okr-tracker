@@ -70,7 +70,13 @@ export async function PUT(
     for (const field of fields) {
       if (body[field] !== undefined) {
         updates.push(`${field} = $${paramIndex++}`);
-        values.push(body[field] as string | number | boolean | null ?? null);
+        // Convert empty strings to null for date fields
+        const value = body[field];
+        if (field === 'target_date' && value === '') {
+          values.push(null);
+        } else {
+          values.push(value as string | number | boolean | null ?? null);
+        }
       }
     }
 

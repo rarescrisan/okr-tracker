@@ -5,7 +5,7 @@ import { Button, Card, Modal, Input, Textarea, Select, Checkbox, Badge, Progress
 import { PageHeader } from '@/src/components/layout';
 import { Department, Objective, KeyResult } from '@/src/types';
 import { UNIT_TYPE_OPTIONS } from '@/src/lib/constants';
-import { calculateProgress, formatValue } from '@/src/lib/utils';
+import { calculateProgress, formatValue, formatInputDate } from '@/src/lib/utils';
 
 export default function ObjectivesPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -167,7 +167,7 @@ export default function ObjectivesPage() {
         current_value: kr.current_value.toString(),
         current_label: kr.current_label || '',
         unit_type: kr.unit_type,
-        target_date: kr.target_date || '',
+        target_date: formatInputDate(kr.target_date),
         is_top_kr: kr.is_top_kr || false,
       });
     } else {
@@ -208,6 +208,7 @@ export default function ObjectivesPage() {
           baseline_value: krForm.baseline_value ? parseFloat(krForm.baseline_value) : null,
           target_value: parseFloat(krForm.target_value),
           current_value: parseFloat(krForm.current_value) || 0,
+          target_date: krForm.target_date || null,
           is_top_kr: krForm.is_top_kr,
         }),
       });
