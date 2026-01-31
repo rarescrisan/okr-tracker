@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/src/lib/utils';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 const navItems = [
   { href: '/okr', label: 'OKR Dashboard' },
@@ -12,7 +13,9 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { role } = useAuth();
   const isAdminPath = pathname?.startsWith('/admin');
+  const isAdmin = role === 'admin';
 
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-[#e8ecee]">
@@ -50,20 +53,22 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
-            {isAdminPath ? (
-              <Link
-                href="/okr"
-                className="px-3 py-2 text-sm font-medium text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9] rounded-md transition-colors"
-              >
-                View Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/admin"
-                className="px-3 py-2 text-sm font-medium text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9] rounded-md transition-colors"
-              >
-                Admin
-              </Link>
+            {isAdmin && (
+              isAdminPath ? (
+                <Link
+                  href="/okr"
+                  className="px-3 py-2 text-sm font-medium text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9] rounded-md transition-colors"
+                >
+                  View Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/admin"
+                  className="px-3 py-2 text-sm font-medium text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9] rounded-md transition-colors"
+                >
+                  Admin
+                </Link>
+              )
             )}
           </div>
         </div>

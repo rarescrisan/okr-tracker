@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx db/seed.ts",
+    "generate-token": "tsx scripts/generate-token.ts",
     "db:seed:force": "tsx db/seed.ts --force",
     "db:seed:novo": "DB_NAME=novo-okr tsx db/seed.ts",
     "db:seed:novo:force": "DB_NAME=novo-okr tsx db/seed.ts --force",
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "jose": "^6.1.3",
     "next": "16.1.1",
     "pg": "^8.17.1",
     "react": "19.2.3",
