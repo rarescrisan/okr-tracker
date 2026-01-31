@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, Badge, Avatar, ProgressBar, Select } from '@/src/components/ui';
+import { Card, Badge, Avatar, ProgressBar } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
 import { Project, User, Department } from '@/src/types';
 import { PRIORITY_OPTIONS, PROJECT_STATUS_OPTIONS, STATUS_OPTIONS } from '@/src/lib/constants';
@@ -84,7 +84,7 @@ export default function WorkTracker() {
   if (loading) {
     return (
       <div>
-        <PageHeader title="Work Tracker" description="View all projects and their tasks" />
+        <PageHeader title="Work Tracker" description="View all projects and tasks" />
         <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
       </div>
     );
@@ -94,63 +94,8 @@ export default function WorkTracker() {
     <div>
       <PageHeader
         title="Work Tracker"
-        description="View all projects and their tasks"
+        description="View all projects and tasks"
       />
-
-      {/* Filters */}
-      {/* <Card className="mb-6">
-        <div className="flex flex-wrap gap-4">
-          <Select
-            options={[
-              { value: 'all', label: 'All Departments' },
-              ...departments.map(d => ({ value: d.id.toString(), label: d.name })),
-            ]}
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="w-44"
-          />
-          <Select
-            options={[
-              { value: 'all', label: 'All Statuses' },
-              ...PROJECT_STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label })),
-            ]}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-40"
-          />
-          <Select
-            options={[
-              { value: 'all', label: 'All Priorities' },
-              ...PRIORITY_OPTIONS.map(p => ({ value: p.value, label: p.label })),
-            ]}
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="w-40"
-          />
-          <Select
-            options={[
-              { value: 'all', label: 'All DRIs' },
-              ...users.map(u => ({ value: u.id.toString(), label: u.name })),
-            ]}
-            value={driFilter}
-            onChange={(e) => setDriFilter(e.target.value)}
-            className="w-48"
-          />
-          {(departmentFilter !== 'all' || statusFilter !== 'all' || priorityFilter !== 'all' || driFilter !== 'all') && (
-            <button
-              onClick={() => {
-                setDepartmentFilter('all');
-                setStatusFilter('all');
-                setPriorityFilter('all');
-                setDriFilter('all');
-              }}
-              className="text-sm text-[#4573d2] hover:underline"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
-      </Card> */}
 
       {filteredProjects.length === 0 ? (
         <Card>
@@ -161,7 +106,7 @@ export default function WorkTracker() {
           </div>
         </Card>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Group by department */}
           {departments.map((dept) => {
             const deptProjects = filteredProjects.filter(p => p.department_id === dept.id);
@@ -170,18 +115,18 @@ export default function WorkTracker() {
               <div key={dept.id}>
                 <div className="flex items-center gap-2 mb-3">
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="w-3 h-3 rounded-full flex-shrink-0"
                     style={{ backgroundColor: dept.color }}
                   />
-                  <h2 className="text-lg font-semibold text-[#1e1f21]">{dept.name}</h2>
-                  <span className="text-sm text-[#6d6e6f]">({deptProjects.length} projects)</span>
+                  <h2 className="text-base sm:text-lg font-semibold text-[#1e1f21]">{dept.name}</h2>
+                  <span className="text-sm text-[#6d6e6f]">({deptProjects.length})</span>
                 </div>
                 <div className="space-y-3">
                   {deptProjects.map((project) => (
                     <Card key={project.id} padding="none" className="overflow-hidden">
-                      {/* Project Row */}
+                      {/* Project Row - Desktop */}
                       <div
-                        className="flex items-center gap-6 px-4 py-3 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
+                        className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-3 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
                         onClick={() => toggleExpand(project.id)}
                       >
                         {/* Expand Icon */}
@@ -229,7 +174,7 @@ export default function WorkTracker() {
                         </div>
 
                         {/* DRI */}
-                        <div className="flex items-center gap-2 w-40 flex-shrink-0">
+                        <div className="hidden lg:flex items-center gap-2 w-36 flex-shrink-0">
                           {project.dri ? (
                             <>
                               <Avatar name={project.dri.name} size="sm" />
@@ -241,7 +186,7 @@ export default function WorkTracker() {
                         </div>
 
                         {/* Working Group */}
-                        <div className="flex -space-x-2 w-20 flex-shrink-0">
+                        <div className="hidden xl:flex -space-x-2 w-20 flex-shrink-0">
                           {project.working_group?.slice(0, 3).map((user) => (
                             <Avatar key={user.id} name={user.name} size="sm" />
                           ))}
@@ -253,12 +198,12 @@ export default function WorkTracker() {
                         </div>
 
                         {/* Progress */}
-                        <div className="w-24 flex-shrink-0">
+                        <div className="w-20 lg:w-24 flex-shrink-0">
                           <ProgressBar value={project.progress_percentage} showLabel size="md" />
                         </div>
 
                         {/* Dates */}
-                        <div className="text-sm text-[#6d6e6f] w-48 flex-shrink-0 text-center whitespace-nowrap">
+                        <div className="hidden xl:block text-sm text-[#6d6e6f] w-44 flex-shrink-0 text-center whitespace-nowrap">
                           {formatDisplayDate(project.start_date)} - {formatDisplayDate(project.end_date)}
                         </div>
 
@@ -268,69 +213,179 @@ export default function WorkTracker() {
                         </Badge>
                       </div>
 
+                      {/* Project Row - Mobile */}
+                      <div
+                        className="md:hidden p-4 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
+                        onClick={() => toggleExpand(project.id)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <svg
+                            className={`w-4 h-4 text-[#6d6e6f] transition-transform flex-shrink-0 mt-1 ${
+                              expandedProjects.has(project.id) ? 'rotate-90' : ''
+                            }`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <Badge color={getPriorityColor(project.priority)} className="flex-shrink-0">
+                                {project.priority}
+                              </Badge>
+                              <Badge color={getStatusColor(project.status)} className="flex-shrink-0">
+                                {getStatusLabel(project.status)}
+                              </Badge>
+                              {(project as unknown as { objective_code?: string }).objective_code && (
+                                <Badge variant="outline" className="flex-shrink-0">
+                                  {(project as unknown as { objective_code: string }).objective_code}
+                                </Badge>
+                              )}
+                            </div>
+                            <h3 className="font-medium text-[#1e1f21] mb-1">{project.name}</h3>
+                            {project.description && (
+                              <p className="text-sm text-[#6d6e6f] line-clamp-2 mb-2">{project.description}</p>
+                            )}
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-2">
+                                {project.dri ? (
+                                  <>
+                                    <Avatar name={project.dri.name} size="xs" />
+                                    <span className="text-xs text-[#6d6e6f]">{project.dri.name}</span>
+                                  </>
+                                ) : (
+                                  <span className="text-xs text-[#9ca0a4]">Unassigned</span>
+                                )}
+                              </div>
+                              <div className="w-20">
+                                <ProgressBar value={project.progress_percentage} showLabel size="sm" />
+                              </div>
+                            </div>
+                            {(project.start_date || project.end_date) && (
+                              <div className="text-xs text-[#9ca0a4] mt-2">
+                                {formatDisplayDate(project.start_date)} - {formatDisplayDate(project.end_date)}
+                              </div>
+                            )}
+                            {project.document_link && (
+                              <a
+                                href={project.document_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-2 px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                View 1-pager
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Tasks */}
                       {expandedProjects.has(project.id) && (
                         <div className="border-t border-[#e8ecee] bg-[#f6f8f9]">
                           {project.tasks && project.tasks.length > 0 ? (
                             <div className="divide-y divide-[#edeef0]">
                               {project.tasks.map((task) => (
-                                <div
-                                  key={task.id}
-                                  className="flex items-center gap-6 px-4 py-2.5 pl-12 hover:bg-[#edeef0] transition-colors"
-                                >
-                                  {/* Task checkbox visual (read-only) */}
-                                  <div
-                                    className={`w-4 h-4 rounded border-2 flex-shrink-0 ${
-                                      task.status === 'completed'
-                                        ? 'bg-[#5da283] border-[#5da283]'
-                                        : 'border-[#e8ecee]'
-                                    }`}
-                                  >
-                                    {task.status === 'completed' && (
-                                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                      </svg>
-                                    )}
+                                <div key={task.id}>
+                                  {/* Task - Desktop */}
+                                  <div className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-2.5 pl-12 hover:bg-[#edeef0] transition-colors">
+                                    {/* Task checkbox visual */}
+                                    <div
+                                      className={`w-4 h-4 rounded border-2 flex-shrink-0 ${
+                                        task.status === 'completed'
+                                          ? 'bg-[#5da283] border-[#5da283]'
+                                          : 'border-[#e8ecee]'
+                                      }`}
+                                    >
+                                      {task.status === 'completed' && (
+                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      )}
+                                    </div>
+
+                                    {/* Task Title */}
+                                    <span className={`flex-1 text-sm ${
+                                      task.status === 'completed' ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'
+                                    }`}>
+                                      {task.title}
+                                    </span>
+
+                                    {/* Assignee */}
+                                    <div className="hidden lg:block w-36 flex-shrink-0">
+                                      {task.assignee_user_id ? (
+                                        <div className="flex items-center gap-2">
+                                          <Avatar
+                                            name={(task as unknown as { assignee_name: string }).assignee_name || 'User'}
+                                            size="xs"
+                                          />
+                                          <span className="text-sm text-[#6d6e6f] truncate">
+                                            {(task as unknown as { assignee_name: string }).assignee_name}
+                                          </span>
+                                        </div>
+                                      ) : (
+                                        <span className="text-sm text-[#9ca0a4]">Unassigned</span>
+                                      )}
+                                    </div>
+
+                                    {/* Dates */}
+                                    <div className="hidden xl:block text-sm text-[#6d6e6f] w-44 flex-shrink-0 text-center whitespace-nowrap">
+                                      {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
+                                    </div>
+
+                                    {/* Status */}
+                                    <Badge color={getStatusColor(task.status)} className="flex-shrink-0">
+                                      {getTaskStatusLabel(task.status)}
+                                    </Badge>
                                   </div>
 
-                                  {/* Task Title */}
-                                  <span className={`flex-1 text-sm ${
-                                    task.status === 'completed' ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'
-                                  }`}>
-                                    {task.title}
-                                  </span>
-
-                                  {/* Assignee */}
-                                  <div className="w-40 flex-shrink-0">
-                                    {task.assignee_user_id ? (
-                                      <div className="flex items-center gap-2">
-                                        <Avatar
-                                          name={(task as unknown as { assignee_name: string }).assignee_name || 'User'}
-                                          size="xs"
-                                        />
-                                        <span className="text-sm text-[#6d6e6f] truncate">
-                                          {(task as unknown as { assignee_name: string }).assignee_name}
-                                        </span>
+                                  {/* Task - Mobile */}
+                                  <div className="md:hidden px-4 py-3 pl-8 hover:bg-[#edeef0] transition-colors">
+                                    <div className="flex items-start gap-3">
+                                      <div
+                                        className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 ${
+                                          task.status === 'completed'
+                                            ? 'bg-[#5da283] border-[#5da283]'
+                                            : 'border-[#e8ecee]'
+                                        }`}
+                                      >
+                                        {task.status === 'completed' && (
+                                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                          </svg>
+                                        )}
                                       </div>
-                                    ) : (
-                                      <span className="text-sm text-[#9ca0a4]">Unassigned</span>
-                                    )}
+                                      <div className="flex-1 min-w-0">
+                                        <span className={`text-sm block ${
+                                          task.status === 'completed' ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'
+                                        }`}>
+                                          {task.title}
+                                        </span>
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                          <Badge color={getStatusColor(task.status)} className="text-xs">
+                                            {getTaskStatusLabel(task.status)}
+                                          </Badge>
+                                          {task.assignee_user_id && (
+                                            <span className="text-xs text-[#6d6e6f]">
+                                              {(task as unknown as { assignee_name: string }).assignee_name}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {(task.start_date || task.end_date) && (
+                                          <div className="text-xs text-[#9ca0a4] mt-1">
+                                            {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
-
-                                  {/* Dates */}
-                                  <div className="text-sm text-[#6d6e6f] w-48 flex-shrink-0 text-center whitespace-nowrap">
-                                    {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
-                                  </div>
-
-                                  {/* Status */}
-                                  <Badge color={getStatusColor(task.status)} className="flex-shrink-0">
-                                    {getTaskStatusLabel(task.status)}
-                                  </Badge>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="px-4 py-4 pl-12 text-sm text-[#9ca0a4]">
+                            <div className="px-4 py-4 pl-8 md:pl-12 text-sm text-[#9ca0a4]">
                               No tasks for this project.
                             </div>
                           )}
@@ -347,16 +402,17 @@ export default function WorkTracker() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-3 h-3 rounded-full bg-[#9ca0a4]" />
-                <h2 className="text-lg font-semibold text-[#1e1f21]">Unassigned</h2>
+                <h2 className="text-base sm:text-lg font-semibold text-[#1e1f21]">Unassigned</h2>
                 <span className="text-sm text-[#6d6e6f]">
-                  ({filteredProjects.filter(p => !p.department_id).length} projects)
+                  ({filteredProjects.filter(p => !p.department_id).length})
                 </span>
               </div>
               <div className="space-y-3">
                 {filteredProjects.filter(p => !p.department_id).map((project) => (
                   <Card key={project.id} padding="none" className="overflow-hidden">
+                    {/* Desktop */}
                     <div
-                      className="flex items-center gap-6 px-4 py-3 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
+                      className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-3 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
                       onClick={() => toggleExpand(project.id)}
                     >
                       <svg
@@ -394,19 +450,60 @@ export default function WorkTracker() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-4 lg:gap-6">
                         {project.dri && (
-                          <div className="flex items-center gap-2 w-40">
+                          <div className="hidden lg:flex items-center gap-2 w-36">
                             <Avatar name={project.dri.name} size="sm" />
                             <span className="text-sm text-[#6d6e6f] truncate">{project.dri.name}</span>
                           </div>
                         )}
-                        <div className="w-24 flex-shrink-0">
+                        <div className="w-20 lg:w-24 flex-shrink-0">
                           <ProgressBar value={project.progress_percentage} showLabel size="md" />
                         </div>
                         <Badge color={getStatusColor(project.status)} className="flex-shrink-0">
                           {getStatusLabel(project.status)}
                         </Badge>
+                      </div>
+                    </div>
+
+                    {/* Mobile */}
+                    <div
+                      className="md:hidden p-4 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
+                      onClick={() => toggleExpand(project.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <svg
+                          className={`w-4 h-4 text-[#6d6e6f] transition-transform flex-shrink-0 mt-1 ${
+                            expandedProjects.has(project.id) ? 'rotate-90' : ''
+                          }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <Badge color={getPriorityColor(project.priority)} className="flex-shrink-0">
+                              {project.priority}
+                            </Badge>
+                            <Badge color={getStatusColor(project.status)} className="flex-shrink-0">
+                              {getStatusLabel(project.status)}
+                            </Badge>
+                          </div>
+                          <h3 className="font-medium text-[#1e1f21] mb-2">{project.name}</h3>
+                          <div className="flex items-center justify-between gap-4">
+                            {project.dri && (
+                              <div className="flex items-center gap-2">
+                                <Avatar name={project.dri.name} size="xs" />
+                                <span className="text-xs text-[#6d6e6f]">{project.dri.name}</span>
+                              </div>
+                            )}
+                            <div className="w-20">
+                              <ProgressBar value={project.progress_percentage} showLabel size="sm" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </Card>
