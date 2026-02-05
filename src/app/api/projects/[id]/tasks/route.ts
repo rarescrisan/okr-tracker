@@ -49,10 +49,10 @@ export async function POST(
     const task = await queryOne<ProjectTask>(
       `INSERT INTO project_tasks (
         project_id, title, description, assignee_user_id,
-        status, start_date, end_date, display_order, document_link,
+        status, progress_percentage, start_date, end_date, display_order, document_link,
         created_at, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *`,
       [
         id,
@@ -60,6 +60,7 @@ export async function POST(
         body.description || null,
         body.assignee_user_id || null,
         body.status || 'not_started',
+        (body as unknown as { progress_percentage?: number }).progress_percentage ?? 0,
         body.start_date || null,
         body.end_date || null,
         displayOrder,

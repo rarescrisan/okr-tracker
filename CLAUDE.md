@@ -174,6 +174,7 @@ CREATE TABLE project_tasks (
   description TEXT,
   assignee_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   status TEXT DEFAULT 'not_started', -- 'not_started' | 'in_progress' | 'blocked' | 'completed'
+  progress_percentage INTEGER DEFAULT 0,
   start_date DATE,
   end_date DATE,
   display_order INTEGER DEFAULT 0,

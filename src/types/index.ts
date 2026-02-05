@@ -84,6 +84,7 @@ export interface ProjectTask {
   description?: string | null;
   assignee_user_id?: number | null;
   status: 'not_started' | 'in_progress' | 'blocked' | 'completed';
+  progress_percentage: number;
   start_date?: string | null;
   end_date?: string | null;
   display_order: number;

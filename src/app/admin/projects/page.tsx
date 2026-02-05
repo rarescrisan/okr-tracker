@@ -42,12 +42,17 @@ export default function ProjectsPage() {
     title: '',
     assignee_user_id: '',
     status: 'not_started',
+    progress_percentage: '0',
     start_date: '',
     end_date: '',
     document_link: '',
   });
 
   const [saving, setSaving] = useState(false);
+  const [draggedProjectId, setDraggedProjectId] = useState<number | null>(null);
+  const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+  const [dragOverProjectId, setDragOverProjectId] = useState<number | null>(null);
+  const [dragOverTaskId, setDragOverTaskId] = useState<number | null>(null);
 
   const fetchData = async () => {
     try {
@@ -184,6 +189,7 @@ export default function ProjectsPage() {
         title: task.title,
         assignee_user_id: task.assignee_user_id?.toString() || '',
         status: task.status,
+        progress_percentage: task.progress_percentage.toString(),
         start_date: formatInputDate(task.start_date),
         end_date: formatInputDate(task.end_date),
         document_link: task.document_link || '',
@@ -194,6 +200,7 @@ export default function ProjectsPage() {
         title: '',
         assignee_user_id: '',
         status: 'not_started',
+        progress_percentage: '0',
         start_date: '',
         end_date: '',
         document_link: '',
@@ -219,6 +226,7 @@ export default function ProjectsPage() {
         body: JSON.stringify({
           ...taskForm,
           assignee_user_id: taskForm.assignee_user_id ? parseInt(taskForm.assignee_user_id) : null,
+          progress_percentage: parseInt(taskForm.progress_percentage),
           start_date: taskForm.start_date || null,
           end_date: taskForm.end_date || null,
           document_link: taskForm.document_link || null,
@@ -259,29 +267,193 @@ export default function ProjectsPage() {
     setProjectForm({ ...projectForm, working_group_ids: newIds });
   };
 
-  const handleReorderProject = async (projectId: number, direction: 'up' | 'down', departmentId: number) => {
-    try {
-      await fetch('/api/projects/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, direction, departmentId }),
-      });
-      await fetchData();
-    } catch (error) {
-      console.error('Error reordering project:', error);
+  // Drag and drop handlers for projects
+  const handleProjectDragStart = (e: React.DragEvent, projectId: number) => {
+    setDraggedProjectId(projectId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.4';
     }
   };
 
-  const handleReorderTask = async (taskId: number, direction: 'up' | 'down', projectId: number) => {
+  const handleProjectDragEnd = (e: React.DragEvent) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+    }
+    setDraggedProjectId(null);
+    setDragOverProjectId(null);
+  };
+
+  const handleProjectDragOver = (e: React.DragEvent, projectId: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverProjectId(projectId);
+  };
+
+  const handleProjectDragLeave = () => {
+    setDragOverProjectId(null);
+  };
+
+  const handleProjectDrop = async (e: React.DragEvent, targetProjectId: number, departmentId: number | null) => {
+    e.preventDefault();
+    if (!draggedProjectId || draggedProjectId === targetProjectId) return;
+
+    // Store original state for potential rollback
+    const originalProjects = [...projects];
+
+    // Get all projects in the same department
+    const deptProjects = projects.filter(p => p.department_id === departmentId)
+      .sort((a, b) => a.display_order - b.display_order);
+
+    const draggedIndex = deptProjects.findIndex(p => p.id === draggedProjectId);
+    const targetIndex = deptProjects.findIndex(p => p.id === targetProjectId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Reorder the array
+    const reordered = [...deptProjects];
+    const [removed] = reordered.splice(draggedIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+
+    // Create a map of updates for fast lookup
+    const updatesMap = new Map<number, number>();
+    reordered.forEach((project, index) => {
+      updatesMap.set(project.id, index);
+    });
+
+    // Optimistic update - create completely new array with updated display_order
+    const updatedProjects = projects.map(project => {
+      if (updatesMap.has(project.id)) {
+        return { ...project, display_order: updatesMap.get(project.id)! };
+      }
+      return project;
+    });
+
+    // Update state immediately
+    setProjects(updatedProjects);
+
+    // Prepare updates for API
+    const updates = Array.from(updatesMap.entries()).map(([id, display_order]) => ({
+      id,
+      display_order
+    }));
+
+    // Make API call in background
     try {
-      await fetch('/api/tasks/reorder', {
+      const response = await fetch('/api/projects/reorder-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId, direction, projectId }),
+        body: JSON.stringify({ updates }),
       });
-      await fetchData();
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder');
+      }
+    } catch (error) {
+      console.error('Error reordering project:', error);
+      // Revert to original state on error
+      setProjects(originalProjects);
+    }
+  };
+
+  // Drag and drop handlers for tasks
+  const handleTaskDragStart = (e: React.DragEvent, taskId: number) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.4';
+    }
+  };
+
+  const handleTaskDragEnd = (e: React.DragEvent) => {
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+    }
+    setDraggedTaskId(null);
+    setDragOverTaskId(null);
+  };
+
+  const handleTaskDragOver = (e: React.DragEvent, taskId: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverTaskId(taskId);
+  };
+
+  const handleTaskDragLeave = () => {
+    setDragOverTaskId(null);
+  };
+
+  const handleTaskDrop = async (e: React.DragEvent, targetTaskId: number, projectId: number) => {
+    e.preventDefault();
+    if (!draggedTaskId || draggedTaskId === targetTaskId) return;
+
+    // Store original state for potential rollback
+    const originalProjects = [...projects];
+
+    // Get all tasks in the same project
+    const project = projects.find(p => p.id === projectId);
+    if (!project || !project.tasks) return;
+
+    const projectTasks = [...project.tasks].sort((a, b) => a.display_order - b.display_order);
+
+    const draggedIndex = projectTasks.findIndex(t => t.id === draggedTaskId);
+    const targetIndex = projectTasks.findIndex(t => t.id === targetTaskId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Reorder the array
+    const reordered = [...projectTasks];
+    const [removed] = reordered.splice(draggedIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+
+    // Create a map of updates for fast lookup
+    const updatesMap = new Map<number, number>();
+    reordered.forEach((task, index) => {
+      updatesMap.set(task.id, index);
+    });
+
+    // Optimistic update - create completely new array with updated tasks
+    const updatedProjects = projects.map(p => {
+      if (p.id === projectId && p.tasks) {
+        return {
+          ...p,
+          tasks: p.tasks.map(task => {
+            if (updatesMap.has(task.id)) {
+              return { ...task, display_order: updatesMap.get(task.id)! };
+            }
+            return task;
+          })
+        };
+      }
+      return p;
+    });
+
+    // Update state immediately
+    setProjects(updatedProjects);
+
+    // Prepare updates for API
+    const updates = Array.from(updatesMap.entries()).map(([id, display_order]) => ({
+      id,
+      display_order
+    }));
+
+    // Make API call in background
+    try {
+      const response = await fetch('/api/tasks/reorder-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updates }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder');
+      }
     } catch (error) {
       console.error('Error reordering task:', error);
+      // Revert to original state on error
+      setProjects(originalProjects);
     }
   };
 
@@ -305,7 +477,9 @@ export default function ProjectsPage() {
         <div className="space-y-6">
           {/* Group projects by department */}
           {departments.map((dept) => {
-            const deptProjects = projects.filter(p => p.department_id === dept.id);
+            const deptProjects = projects
+              .filter(p => p.department_id === dept.id)
+              .sort((a, b) => a.display_order - b.display_order);
             if (deptProjects.length === 0) return null;
             return (
               <div key={dept.id}>
@@ -321,12 +495,31 @@ export default function ProjectsPage() {
                   {deptProjects.map((project) => (
                     <Card key={project.id} padding="none">
                       <div
-                        className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#f6f8f9]"
-                        onClick={() => toggleExpand(project.id)}
+                        draggable
+                        onDragStart={(e) => handleProjectDragStart(e, project.id)}
+                        onDragEnd={handleProjectDragEnd}
+                        onDragOver={(e) => handleProjectDragOver(e, project.id)}
+                        onDragLeave={handleProjectDragLeave}
+                        onDrop={(e) => handleProjectDrop(e, project.id, dept.id)}
+                        className={`flex items-center justify-between px-4 py-3 cursor-move hover:bg-[#f6f8f9] transition-all ${
+                          dragOverProjectId === project.id && draggedProjectId !== project.id
+                            ? 'border-t-2 border-[#4573d2]'
+                            : ''
+                        }`}
                       >
-                        <div className="flex items-center gap-4 flex-1">
+                        <div className="flex items-center gap-4 flex-1" onClick={() => toggleExpand(project.id)}>
+                          {/* Drag handle icon */}
                           <svg
-                            className={`w-4 h-4 text-[#6d6e6f] transition-transform ${
+                            className="w-4 h-4 text-[#9ca0a4] flex-shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                          </svg>
+
+                          <svg
+                            className={`w-4 h-4 text-[#6d6e6f] transition-transform cursor-pointer ${
                               expandedProjects.has(project.id) ? 'rotate-90' : ''
                             }`}
                             fill="none"
@@ -395,26 +588,6 @@ export default function ProjectsPage() {
                         </div>
 
                         <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex flex-col gap-0.5 mr-2">
-                            <button
-                              onClick={() => handleReorderProject(project.id, 'up', dept.id)}
-                              className="p-0.5 text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#e8ecee] rounded transition-colors"
-                              title="Move up"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleReorderProject(project.id, 'down', dept.id)}
-                              className="p-0.5 text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#e8ecee] rounded transition-colors"
-                              title="Move down"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                          </div>
                           <button
                             onClick={() => openTaskModal(project.id)}
                             className="px-3 py-1 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
@@ -438,28 +611,33 @@ export default function ProjectsPage() {
 
                       {expandedProjects.has(project.id) && project.tasks && project.tasks.length > 0 && (
                         <div className="border-t border-[#e8ecee] bg-[#f6f8f9]">
-                          {project.tasks.map((task) => (
-                            <div key={task.id} className="flex items-center px-4 py-3 pl-12 border-b border-[#edeef0] last:border-0">
-                              <div className="flex items-center gap-2 mr-3">
-                                <button
-                                  onClick={() => handleReorderTask(task.id, 'up', project.id)}
-                                  className="p-0.5 text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#e8ecee] rounded transition-colors"
-                                  title="Move up"
-                                >
-                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleReorderTask(task.id, 'down', project.id)}
-                                  className="p-0.5 text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#e8ecee] rounded transition-colors"
-                                  title="Move down"
-                                >
-                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                  </svg>
-                                </button>
-                              </div>
+                          {project.tasks
+                            .slice()
+                            .sort((a, b) => a.display_order - b.display_order)
+                            .map((task) => (
+                            <div
+                              key={task.id}
+                              draggable
+                              onDragStart={(e) => handleTaskDragStart(e, task.id)}
+                              onDragEnd={handleTaskDragEnd}
+                              onDragOver={(e) => handleTaskDragOver(e, task.id)}
+                              onDragLeave={handleTaskDragLeave}
+                              onDrop={(e) => handleTaskDrop(e, task.id, project.id)}
+                              className={`flex items-center px-4 py-3 pl-12 border-b border-[#edeef0] last:border-0 cursor-move hover:bg-[#edeef0] transition-all ${
+                                dragOverTaskId === task.id && draggedTaskId !== task.id
+                                  ? 'border-t-2 border-[#4573d2]'
+                                  : ''
+                              }`}
+                            >
+                              {/* Drag handle icon */}
+                              <svg
+                                className="w-3.5 h-3.5 text-[#9ca0a4] mr-3 flex-shrink-0"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                              </svg>
                               <div className="flex-1 min-w-0 flex items-center gap-2">
                                 <span className="text-sm text-[#1e1f21]">{task.title}</span>
                                 {task.document_link && (
@@ -488,6 +666,9 @@ export default function ProjectsPage() {
                                       </span>
                                     </div>
                                   )}
+                                </div>
+                                <div className="w-20">
+                                  <ProgressBar value={task.progress_percentage} showLabel size="sm" />
                                 </div>
                                 <div className="w-44 text-sm text-[#6d6e6f] text-center whitespace-nowrap">
                                   {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
@@ -531,15 +712,37 @@ export default function ProjectsPage() {
                 </span>
               </div>
               <div className="space-y-3">
-                {projects.filter(p => !p.department_id).map((project) => (
+                {projects
+                  .filter(p => !p.department_id)
+                  .sort((a, b) => a.display_order - b.display_order)
+                  .map((project) => (
                   <Card key={project.id} padding="none">
                     <div
-                      className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#f6f8f9]"
-                      onClick={() => toggleExpand(project.id)}
+                      draggable
+                      onDragStart={(e) => handleProjectDragStart(e, project.id)}
+                      onDragEnd={handleProjectDragEnd}
+                      onDragOver={(e) => handleProjectDragOver(e, project.id)}
+                      onDragLeave={handleProjectDragLeave}
+                      onDrop={(e) => handleProjectDrop(e, project.id, null)}
+                      className={`flex items-center justify-between px-4 py-3 cursor-move hover:bg-[#f6f8f9] transition-all ${
+                        dragOverProjectId === project.id && draggedProjectId !== project.id
+                          ? 'border-t-2 border-[#4573d2]'
+                          : ''
+                      }`}
                     >
-                      <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-4 flex-1" onClick={() => toggleExpand(project.id)}>
+                        {/* Drag handle icon */}
                         <svg
-                          className={`w-4 h-4 text-[#6d6e6f] transition-transform ${
+                          className="w-4 h-4 text-[#9ca0a4] flex-shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                        </svg>
+
+                        <svg
+                          className={`w-4 h-4 text-[#6d6e6f] transition-transform cursor-pointer ${
                             expandedProjects.has(project.id) ? 'rotate-90' : ''
                           }`}
                           fill="none"
@@ -856,7 +1059,7 @@ export default function ProjectsPage() {
             placeholder="Enter task title"
             required
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <Select
               label="Assignee"
               options={[
@@ -871,6 +1074,14 @@ export default function ProjectsPage() {
               options={STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }))}
               value={taskForm.status}
               onChange={(e) => setTaskForm({ ...taskForm, status: e.target.value })}
+            />
+            <Input
+              label="Progress %"
+              type="number"
+              min="0"
+              max="100"
+              value={taskForm.progress_percentage}
+              onChange={(e) => setTaskForm({ ...taskForm, progress_percentage: e.target.value })}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

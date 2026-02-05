@@ -330,6 +330,11 @@ export default function WorkTracker() {
                                       )}
                                     </div>
 
+                                    {/* Progress */}
+                                    <div className="hidden lg:block w-20 flex-shrink-0">
+                                      <ProgressBar value={task.progress_percentage} showLabel size="sm" />
+                                    </div>
+
                                     {/* Dates */}
                                     <div className="hidden xl:block text-sm text-[#6d6e6f] w-44 flex-shrink-0 text-center whitespace-nowrap">
                                       {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
@@ -372,6 +377,9 @@ export default function WorkTracker() {
                                               {(task as unknown as { assignee_name: string }).assignee_name}
                                             </span>
                                           )}
+                                        </div>
+                                        <div className="w-20 mt-2">
+                                          <ProgressBar value={task.progress_percentage} showLabel size="sm" />
                                         </div>
                                         {(task.start_date || task.end_date) && (
                                           <div className="text-xs text-[#9ca0a4] mt-1">

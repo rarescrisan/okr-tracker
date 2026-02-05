@@ -22,10 +22,29 @@ export function formatInputDate(date: string | null | undefined): string {
 }
 
 // Calculate progress percentage
-export function calculateProgress(current: number, target: number): number {
-  if (target === 0) return 0;
-  const progress = (current / target) * 100;
-  return Math.min(Math.round(progress), 100);
+// When baseline is provided, calculates progress from baseline to target
+// Otherwise calculates simple current/target ratio
+export function calculateProgress(
+  current: number | null | undefined,
+  target: number | null | undefined,
+  baseline?: number | null
+): number {
+  const curr = current ?? 0;
+  const tgt = target ?? 0;
+  const base = baseline ?? 0;
+
+  if (tgt === 0) return 0;
+
+  // If baseline is provided and different from target, calculate relative progress
+  if (baseline !== null && baseline !== undefined && tgt !== base) {
+    const range = tgt - base;
+    const progress = ((curr - base) / range) * 100;
+    return Math.max(0, Math.min(Math.round(progress), 100));
+  }
+
+  // Simple calculation: current / target
+  const progress = (curr / tgt) * 100;
+  return Math.max(0, Math.min(Math.round(progress), 100));
 }
 
 // Format number based on unit type
