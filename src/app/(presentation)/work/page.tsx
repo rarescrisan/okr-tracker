@@ -81,6 +81,44 @@ export default function WorkTracker() {
     return STATUS_OPTIONS.find(s => s.value === status)?.label || status;
   };
 
+  const handleTaskToggle = async (taskId: number, currentStatus: string) => {
+    const newStatus = currentStatus === 'completed' ? 'not_started' : 'completed';
+    const newProgress = currentStatus === 'completed' ? 0 : 100;
+
+    // Optimistic update
+    const updatedProjects = projects.map(project => {
+      if (project.tasks) {
+        return {
+          ...project,
+          tasks: project.tasks.map(task =>
+            task.id === taskId
+              ? { ...task, status: newStatus, progress_percentage: newProgress }
+              : task
+          )
+        };
+      }
+      return project;
+    });
+    setProjects(updatedProjects);
+
+    // Update in background
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, progress_percentage: newProgress }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+    } catch (error) {
+      console.error('Error updating task:', error);
+      // Revert on error
+      setProjects(projects);
+    }
+  };
+
   if (loading) {
     return (
       <div>
@@ -291,20 +329,25 @@ export default function WorkTracker() {
                                 <div key={task.id}>
                                   {/* Task - Desktop */}
                                   <div className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-2.5 pl-12 hover:bg-[#edeef0] transition-colors">
-                                    {/* Task checkbox visual */}
-                                    <div
-                                      className={`w-4 h-4 rounded border-2 flex-shrink-0 ${
+                                    {/* Task checkbox - clickable */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleTaskToggle(task.id, task.status);
+                                      }}
+                                      className={`w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center cursor-pointer transition-colors ${
                                         task.status === 'completed'
-                                          ? 'bg-[#5da283] border-[#5da283]'
-                                          : 'border-[#e8ecee]'
+                                          ? 'bg-[#5da283] border-[#5da283] hover:bg-[#4a8a6b]'
+                                          : 'border-[#c4c7c9] hover:border-[#5da283] hover:bg-[#f0f9f5]'
                                       }`}
+                                      title={task.status === 'completed' ? 'Mark as incomplete' : 'Mark as complete'}
                                     >
                                       {task.status === 'completed' && (
                                         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                         </svg>
                                       )}
-                                    </div>
+                                    </button>
 
                                     {/* Task Title */}
                                     <span className={`flex-1 text-sm ${
@@ -349,19 +392,24 @@ export default function WorkTracker() {
                                   {/* Task - Mobile */}
                                   <div className="md:hidden px-4 py-3 pl-8 hover:bg-[#edeef0] transition-colors">
                                     <div className="flex items-start gap-3">
-                                      <div
-                                        className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 ${
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleTaskToggle(task.id, task.status);
+                                        }}
+                                        className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center cursor-pointer transition-colors ${
                                           task.status === 'completed'
-                                            ? 'bg-[#5da283] border-[#5da283]'
-                                            : 'border-[#e8ecee]'
+                                            ? 'bg-[#5da283] border-[#5da283] hover:bg-[#4a8a6b]'
+                                            : 'border-[#c4c7c9] hover:border-[#5da283] hover:bg-[#f0f9f5]'
                                         }`}
+                                        title={task.status === 'completed' ? 'Mark as incomplete' : 'Mark as complete'}
                                       >
                                         {task.status === 'completed' && (
                                           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                           </svg>
                                         )}
-                                      </div>
+                                      </button>
                                       <div className="flex-1 min-w-0">
                                         <span className={`text-sm block ${
                                           task.status === 'completed' ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'
