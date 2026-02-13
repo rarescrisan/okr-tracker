@@ -33,10 +33,7 @@ async function verifyTokenViaApi(token: string): Promise<VerifyResponse> {
 }
 
 function canAccessPath(role: 'view' | 'admin' | null, path: string): boolean {
-  if (!role) return false;
-  if (path.startsWith('/admin')) {
-    return role === 'admin';
-  }
+  // BYPASSED: Always allow access
   return true;
 }
 
@@ -57,40 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   useEffect(() => {
-    async function initAuth() {
-      const queryToken = searchParams.get('token');
-
-      if (queryToken) {
-        const result = await verifyTokenViaApi(queryToken);
-        if (result.valid && result.role) {
-          localStorage.setItem(AUTH_TOKEN_KEY, queryToken);
-          document.cookie = `${AUTH_COOKIE_NAME}=${queryToken}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=strict`;
-          setRole(result.role);
-
-          const url = new URL(window.location.href);
-          url.searchParams.delete('token');
-          router.replace(url.pathname + (url.search || ''));
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
-      if (storedToken) {
-        const result = await verifyTokenViaApi(storedToken);
-        if (result.valid && result.role) {
-          setRole(result.role);
-          document.cookie = `${AUTH_COOKIE_NAME}=${storedToken}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=strict`;
-        } else {
-          localStorage.removeItem(AUTH_TOKEN_KEY);
-          document.cookie = `${AUTH_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-        }
-      }
-      setIsLoading(false);
-    }
-
-    initAuth();
-  }, [searchParams, router]);
+    // BYPASSED: Always set admin role without token verification
+    setRole('admin');
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && role && !canAccessPath(role, pathname)) {
