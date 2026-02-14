@@ -70,7 +70,7 @@ export interface Project {
   document_link?: string | null;
   department?: Department;
   objective?: Objective;
-  dri?: User;
+  dri?: User | null;
   working_group?: User[];
   tasks?: ProjectTask[];
   created_at: string;

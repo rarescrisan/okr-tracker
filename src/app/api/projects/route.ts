@@ -97,6 +97,8 @@ export async function GET(request: NextRequest) {
           created_at: '',
           updated_at: ''
         };
+      } else {
+        project.dri = null;
       }
     }
 

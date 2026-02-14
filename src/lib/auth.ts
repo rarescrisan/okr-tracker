@@ -36,7 +36,7 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
  * - 'view' role can only access non-admin paths
  * BYPASSED: Always returns true - all paths accessible
  */
-export function canAccessPath(role: 'view' | 'admin' | null, path: string): boolean {
+export function canAccessPath(_role: 'view' | 'admin' | null, _path: string): boolean {
   // Bypass authentication - always allow access
   return true;
 }

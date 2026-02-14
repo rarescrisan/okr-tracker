@@ -187,7 +187,7 @@ function DocumentLink({ href }: DocumentLinkProps) {
 }
 
 interface DRIInfoProps {
-  dri: { id: number; name: string; email?: string } | null;
+  dri?: { id: number; name: string; email?: string | null } | null;
   className?: string;
   size?: 'xs' | 'sm';
 }
