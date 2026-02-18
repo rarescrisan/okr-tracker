@@ -61,10 +61,10 @@ export async function POST(request: NextRequest) {
       `INSERT INTO key_results (
         objective_id, code, title, description,
         baseline_value, baseline_label, target_value, target_label,
-        current_value, current_label, unit_type, target_date,
+        current_value, current_label, unit_type, direction, target_date,
         is_top_kr, created_at, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *`,
       [
         body.objective_id,
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
         body.current_value ?? 0,
         body.current_label || null,
         body.unit_type || 'number',
+        body.direction || 'increase',
         body.target_date || null,
         body.is_top_kr || false,
         now,

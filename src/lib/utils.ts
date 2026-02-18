@@ -22,27 +22,50 @@ export function formatInputDate(date: string | null | undefined): string {
 }
 
 // Calculate progress percentage
-// When baseline is provided, calculates progress from baseline to target
-// Otherwise calculates simple current/target ratio
+// direction='increase' (default): higher current = more progress
+// direction='decrease': lower current = more progress (e.g. payback period, ticket count)
 export function calculateProgress(
   current: number | null | undefined,
   target: number | null | undefined,
-  baseline?: number | null
+  baseline?: number | null,
+  direction: 'increase' | 'decrease' = 'increase'
 ): number {
   const curr = current ?? 0;
   const tgt = target ?? 0;
   const base = baseline ?? 0;
 
+  // Lower-is-better metrics
+  if (direction === 'decrease') {
+    if (curr <= 0) return 0;
+    // If a meaningful baseline is provided above the target, use baseline-adjusted formula
+    if (baseline !== null && baseline !== undefined && base > tgt) {
+      const range = base - tgt;
+      const progress = ((base - curr) / range) * 100;
+      return Math.max(0, Math.min(Math.round(progress), 100));
+    }
+    // Simple: target/current — 100% when at target, <100% when above, >100% when below
+    if (tgt <= 0) return 0;
+    return Math.max(0, Math.min(Math.round((tgt / curr) * 100), 100));
+  }
+
+  // Higher-is-better (default)
   if (tgt === 0) return 0;
 
-  // If baseline is provided and different from target, calculate relative progress
   if (baseline !== null && baseline !== undefined && tgt !== base) {
     const range = tgt - base;
     const progress = ((curr - base) / range) * 100;
+
+    if (progress <= 0 && curr > 0 && tgt > base) {
+      // Current hasn't moved above baseline yet (or regressed): fall back to simple ratio
+      return Math.max(0, Math.min(Math.round((curr / tgt) * 100), 100));
+    }
+    if (progress < 0) {
+      return 0;
+    }
+
     return Math.max(0, Math.min(Math.round(progress), 100));
   }
 
-  // Simple calculation: current / target
   const progress = (curr / tgt) * 100;
   return Math.max(0, Math.min(Math.round(progress), 100));
 }

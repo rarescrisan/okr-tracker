@@ -116,7 +116,20 @@ export const UNIT_TYPE_OPTIONS = [
   { value: 'percentage', label: 'Percentage (%)' },
 ] as const;
 
+export const DIRECTION_OPTIONS = [
+  { value: 'increase', label: 'Higher is better' },
+  { value: 'decrease', label: 'Lower is better' },
+] as const;
+
+export const X_REQUEST_STATUS_OPTIONS = [
+  { value: 'open', label: 'Open', color: COLORS.status.notStarted },
+  { value: 'in_progress', label: 'In Progress', color: COLORS.status.inProgress },
+  { value: 'completed', label: 'Completed', color: COLORS.status.completed },
+  { value: 'declined', label: 'Declined', color: COLORS.status.blocked },
+] as const;
+
 export type StatusValue = typeof STATUS_OPTIONS[number]['value'];
 export type ProjectStatusValue = typeof PROJECT_STATUS_OPTIONS[number]['value'];
 export type PriorityValue = typeof PRIORITY_OPTIONS[number]['value'];
 export type UnitTypeValue = typeof UNIT_TYPE_OPTIONS[number]['value'];
+export type XRequestStatusValue = typeof X_REQUEST_STATUS_OPTIONS[number]['value'];

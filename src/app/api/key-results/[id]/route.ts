@@ -64,7 +64,7 @@ export async function PUT(
     const fields: (keyof UpdateKeyResult)[] = [
       'objective_id', 'code', 'title', 'description',
       'baseline_value', 'baseline_label', 'target_value', 'target_label',
-      'current_value', 'current_label', 'unit_type', 'target_date', 'is_top_kr'
+      'current_value', 'current_label', 'unit_type', 'direction', 'target_date', 'is_top_kr'
     ];
 
     for (const field of fields) {

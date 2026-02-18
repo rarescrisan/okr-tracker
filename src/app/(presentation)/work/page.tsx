@@ -8,6 +8,7 @@ import { fetchWorkData, updateTaskStatus } from './lib/api';
 import { toggleTaskStatus } from './utils/helpers';
 import { EmptyState } from './components/EmptyState';
 import { DepartmentSection } from './components/DepartmentSection';
+import { PriorityView } from './components/PriorityView';
 
 export default function WorkTracker() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -15,6 +16,7 @@ export default function WorkTracker() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedProjects, setExpandedProjects] = useState<Set<number>>(new Set());
+  const [viewMode, setViewMode] = useState<'department' | 'priority'>('department');
 
   // Filters (currently not rendered in UI, but kept for future use)
   const [departmentFilter] = useState('all');
@@ -108,12 +110,42 @@ export default function WorkTracker() {
     );
   }
 
+  const viewToggle = (
+    <div className="flex items-center gap-1 bg-[#f0f2f4] rounded-lg p-1">
+      <button
+        onClick={() => setViewMode('department')}
+        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          viewMode === 'department'
+            ? 'bg-white text-[#1e1f21] shadow-sm'
+            : 'text-[#6d6e6f] hover:text-[#1e1f21]'
+        }`}
+      >
+        Department
+      </button>
+      <button
+        onClick={() => setViewMode('priority')}
+        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          viewMode === 'priority'
+            ? 'bg-white text-[#1e1f21] shadow-sm'
+            : 'text-[#6d6e6f] hover:text-[#1e1f21]'
+        }`}
+      >
+        Deadline
+      </button>
+    </div>
+  );
+
   return (
     <div>
-      <PageHeader title="Work Tracker" description="View all projects and tasks" />
+      <PageHeader title="Work Tracker" description="View all projects and tasks" actions={viewToggle} />
 
       {filteredProjects.length === 0 ? (
         <EmptyState hasProjects={projects.length > 0} />
+      ) : viewMode === 'priority' ? (
+        <PriorityView
+          projects={filteredProjects}
+          onTaskToggle={handleTaskToggle}
+        />
       ) : (
         <div className="space-y-4 sm:space-y-6">
           {/* Projects grouped by department */}

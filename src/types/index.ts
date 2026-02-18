@@ -45,6 +45,7 @@ export interface KeyResult {
   current_value: number;
   current_label?: string | null;
   unit_type: 'number' | 'currency' | 'percentage';
+  direction: 'increase' | 'decrease';
   target_date?: string | null;
   is_top_kr: boolean;
   objective?: Objective;
@@ -128,3 +129,27 @@ export type UpdateProject = Partial<CreateProject>;
 
 export type CreateProjectTask = Omit<ProjectTask, 'id' | 'created_at' | 'updated_at' | 'assignee' | 'project'>;
 export type UpdateProjectTask = Partial<CreateProjectTask>;
+
+export interface XRequest {
+  id: number;
+  requesting_department_id: number;
+  requesting_user_id: number;
+  requesting_project_id?: number | null;
+  requesting_task_id?: number | null;
+  target_department_id: number;
+  target_user_id?: number | null;
+  description: string;
+  status: 'open' | 'in_progress' | 'completed' | 'declined';
+  display_order: number;
+  requesting_department?: Department;
+  requesting_user?: User;
+  requesting_project?: Project;
+  requesting_task?: ProjectTask;
+  target_department?: Department;
+  target_user?: User;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CreateXRequest = Omit<XRequest, 'id' | 'created_at' | 'updated_at' | 'requesting_department' | 'requesting_user' | 'requesting_project' | 'requesting_task' | 'target_department' | 'target_user'>;
+export type UpdateXRequest = Partial<CreateXRequest>;

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button, Card, Modal, Input, Textarea, Select, Checkbox, Badge, ProgressBar } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
 import { Department, Objective, KeyResult } from '@/src/types';
-import { UNIT_TYPE_OPTIONS } from '@/src/lib/constants';
+import { UNIT_TYPE_OPTIONS, DIRECTION_OPTIONS } from '@/src/lib/constants';
 import { calculateProgress, formatValue, formatInputDate } from '@/src/lib/utils';
 
 export default function ObjectivesPage() {
@@ -39,6 +39,7 @@ export default function ObjectivesPage() {
     current_value: '',
     current_label: '',
     unit_type: 'number' as 'number' | 'currency' | 'percentage',
+    direction: 'increase' as 'increase' | 'decrease',
     target_date: '',
     is_top_kr: false,
   });
@@ -167,6 +168,7 @@ export default function ObjectivesPage() {
         current_value: kr.current_value.toString(),
         current_label: kr.current_label || '',
         unit_type: kr.unit_type,
+        direction: kr.direction || 'increase',
         target_date: formatInputDate(kr.target_date),
         is_top_kr: kr.is_top_kr || false,
       });
@@ -183,6 +185,7 @@ export default function ObjectivesPage() {
         current_value: '0',
         current_label: '',
         unit_type: 'number',
+        direction: 'increase',
         target_date: '',
         is_top_kr: false,
       });
@@ -343,7 +346,7 @@ export default function ObjectivesPage() {
                             </thead>
                             <tbody>
                               {obj.key_results.map((kr) => {
-                                const progress = calculateProgress(kr.current_value, kr.target_value);
+                                const progress = calculateProgress(kr.current_value, kr.target_value, kr.baseline_value, kr.direction || 'increase');
                                 return (
                                   <tr key={kr.id} className={`border-t border-[#e8ecee] ${kr.is_top_kr ? 'bg-[#fff8e1]' : ''}`}>
                                     <td className="py-2">
@@ -470,6 +473,25 @@ export default function ObjectivesPage() {
               value={krForm.unit_type}
               onChange={(e) => setKrForm({ ...krForm, unit_type: e.target.value as 'number' | 'currency' | 'percentage' })}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1e1f21] mb-1">Direction</label>
+            <div className="flex rounded-lg border border-[#e8ecee] overflow-hidden">
+              {DIRECTION_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setKrForm({ ...krForm, direction: opt.value as 'increase' | 'decrease' })}
+                  className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                    krForm.direction === opt.value
+                      ? 'bg-[#4573d2] text-white'
+                      : 'bg-white text-[#6d6e6f] hover:bg-[#f6f8f9]'
+                  }`}
+                >
+                  {opt.value === 'increase' ? '↑ ' : '↓ '}{opt.label}
+                </button>
+              ))}
+            </div>
           </div>
           <Input
             label="Title"

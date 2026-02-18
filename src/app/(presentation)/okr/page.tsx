@@ -146,7 +146,7 @@ export default function OKRDashboard() {
                         </span>
                       </div>
                       <div className="w-24">
-                        <ProgressBar value={calculateProgress(dept.topKR.current_value, dept.topKR.target_value, dept.topKR.baseline_value)} showLabel size="sm" />
+                        <ProgressBar value={calculateProgress(dept.topKR.current_value, dept.topKR.target_value, dept.topKR.baseline_value, dept.topKR.direction || 'increase')} showLabel size="sm" />
                       </div>
                     </div>
                   </div>
@@ -168,7 +168,7 @@ export default function OKRDashboard() {
                         <div className="text-sm font-medium">{formatValue(dept.topKR.target_value, dept.topKR.unit_type, dept.topKR.target_label)}</div>
                       </div>
                       <div className="w-32">
-                        <ProgressBar value={calculateProgress(dept.topKR.current_value, dept.topKR.target_value, dept.topKR.baseline_value)} showLabel size="sm" />
+                        <ProgressBar value={calculateProgress(dept.topKR.current_value, dept.topKR.target_value, dept.topKR.baseline_value, dept.topKR.direction || 'increase')} showLabel size="sm" />
                       </div>
                     </div>
                   </div>
@@ -211,7 +211,7 @@ export default function OKRDashboard() {
 
                             {/* Key Result Rows */}
                             {obj.key_results?.map((kr) => {
-                              const progress = calculateProgress(kr.current_value, kr.target_value, kr.baseline_value);
+                              const progress = calculateProgress(kr.current_value, kr.target_value, kr.baseline_value, kr.direction || 'increase');
                               return (
                                 <tr key={`kr-${kr.id}`} className={`border-t border-[#edeef0] hover:bg-[#f6f8f9] ${kr.is_top_kr ? 'bg-[#fff8e1]' : 'bg-white'}`}>
                                   <td className="px-6 py-3 pl-12">
@@ -260,7 +260,7 @@ export default function OKRDashboard() {
                         {/* Key Results */}
                         <div className="space-y-3 ml-0 sm:ml-4">
                           {obj.key_results?.map((kr) => {
-                            const progress = calculateProgress(kr.current_value, kr.target_value, kr.baseline_value);
+                            const progress = calculateProgress(kr.current_value, kr.target_value, kr.baseline_value, kr.direction || 'increase');
                             return (
                               <div
                                 key={kr.id}
