@@ -19,6 +19,22 @@ interface PriorityViewProps {
   onTaskToggle: (taskId: number, currentStatus: string) => void;
 }
 
+function getMonthKey(dateStr: string | null | undefined): string {
+  if (!dateStr) return 'no-deadline';
+  const d = new Date(dateStr);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+function getMonthLabel(key: string): string {
+  if (key === 'no-deadline') return 'No Deadline';
+  const [year, month] = key.split('-').map(Number);
+  const d = new Date(year, month - 1, 1);
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const label = d.toLocaleString('default', { month: 'long' });
+  return year !== currentYear ? `${label} ${year}` : label;
+}
+
 export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
   const flatTasks: FlatTask[] = projects.flatMap((project) =>
     (project.tasks ?? []).map((task) => ({
@@ -30,14 +46,16 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
     }))
   );
 
-  const sortedTasks = [...flatTasks].filter((t) => t.status !== 'completed').sort((a, b) => {
-    if (!a.end_date && !b.end_date) return 0;
-    if (!a.end_date) return 1;
-    if (!b.end_date) return -1;
-    return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
-  });
+  const activeTasks = [...flatTasks]
+    .filter((t) => t.status !== 'completed')
+    .sort((a, b) => {
+      if (!a.end_date && !b.end_date) return 0;
+      if (!a.end_date) return 1;
+      if (!b.end_date) return -1;
+      return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
+    });
 
-  if (sortedTasks.length === 0) {
+  if (activeTasks.length === 0) {
     return (
       <Card>
         <div className="p-8 text-center text-[#6d6e6f]">No tasks found.</div>
@@ -45,10 +63,40 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
     );
   }
 
+  // Group by month key, preserving sort order
+  const groups = activeTasks.reduce<{ key: string; tasks: FlatTask[] }[]>((acc, task) => {
+    const key = getMonthKey(task.end_date);
+    const existing = acc.find((g) => g.key === key);
+    if (existing) {
+      existing.tasks.push(task);
+    } else {
+      acc.push({ key, tasks: [task] });
+    }
+    return acc;
+  }, []);
+
+  // Move "no-deadline" group to the end
+  const sorted = [
+    ...groups.filter((g) => g.key !== 'no-deadline'),
+    ...groups.filter((g) => g.key === 'no-deadline'),
+  ];
+
   return (
-    <div className="space-y-2">
-      {sortedTasks.map((task) => (
-        <DeadlineTaskRow key={task.id} task={task} onToggle={onTaskToggle} />
+    <div className="space-y-6">
+      {sorted.map(({ key, tasks }) => (
+        <div key={key}>
+          <h3 className="text-sm font-semibold text-[#6d6e6f] uppercase tracking-wide mb-2 px-1">
+            {getMonthLabel(key)}
+            <span className="ml-2 font-normal normal-case tracking-normal text-[#9ca0a4]">
+              ({tasks.length})
+            </span>
+          </h3>
+          <div className="space-y-2">
+            {tasks.map((task) => (
+              <DeadlineTaskRow key={task.id} task={task} onToggle={onTaskToggle} />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );
