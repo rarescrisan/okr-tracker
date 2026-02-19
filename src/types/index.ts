@@ -153,3 +153,16 @@ export interface XRequest {
 
 export type CreateXRequest = Omit<XRequest, 'id' | 'created_at' | 'updated_at' | 'requesting_department' | 'requesting_user' | 'requesting_project' | 'requesting_task' | 'target_department' | 'target_user'>;
 export type UpdateXRequest = Partial<CreateXRequest>;
+
+export interface Announcement {
+  id: number;
+  department_id: number;
+  author_name: string;
+  description: string;
+  department?: Department;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CreateAnnouncement = Omit<Announcement, 'id' | 'created_at' | 'updated_at' | 'department'>;
+export type UpdateAnnouncement = Partial<CreateAnnouncement>;

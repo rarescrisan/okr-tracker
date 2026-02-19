@@ -10,7 +10,7 @@ const navItems = [
   { href: '/okr', label: 'OKR' },
   { href: '/work', label: 'Work' },
   { href: '/gantt', label: 'Timeline' },
-  { href: '/x-requests', label: 'X-Requests' },
+  { href: '/discussions', label: 'Discussions' },
 ];
 
 export function Navbar() {
