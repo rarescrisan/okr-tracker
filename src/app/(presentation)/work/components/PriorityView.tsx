@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Card, Avatar, Badge, ProgressBar, Modal } from '@/src/components/ui';
+import { useEffect } from 'react';
+import { Card, Avatar, Badge, ProgressBar } from '@/src/components/ui';
 import { formatDisplayDate } from '@/src/lib/utils';
 import { Project, ProjectTask, Department } from '@/src/types';
 import { getStatusColor, getStatusLabel, getTaskStatusLabel, getPriorityColor } from '../utils/helpers';
@@ -356,115 +357,134 @@ interface ProjectDetailModalProps {
 function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
   const tasks = project.tasks ?? [];
 
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
-    <Modal isOpen onClose={onClose} size="xl" maxHeight={680}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-5">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
-          <h2 className="text-lg font-semibold text-white leading-tight">{project.name}</h2>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1 text-[#A0A8C8] hover:text-white hover:bg-white/[0.08] rounded transition-colors flex-shrink-0"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-black/40"
+        onClick={onClose}
+      />
 
-      {/* Meta row */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <Badge color={getStatusColor(project.status)}>{getStatusLabel(project.status)}</Badge>
-        <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
-        {project.department && (
-          <Badge color={project.department.color} dot>{project.department.name}</Badge>
-        )}
-        {project.objective_code && (
-          <span className="text-xs text-[#A0A8C8] bg-white/[0.08] px-2 py-0.5 rounded">
-            {project.objective_code}
-          </span>
-        )}
-      </div>
-
-      {/* Progress */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-[#A0A8C8]">Overall progress</span>
-          <span className="text-xs font-medium text-white">{project.progress_percentage}%</span>
-        </div>
-        <ProgressBar value={project.progress_percentage} size="sm" />
-      </div>
-
-      {/* Dates / DRI / Description row */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-5 text-sm">
-        {(project.start_date || project.end_date) && (
-          <div>
-            <p className="text-xs text-[#6B7394] mb-0.5">Dates</p>
-            <p className="text-white">
-              {formatDisplayDate(project.start_date)} – {formatDisplayDate(project.end_date)}
-            </p>
+      {/* Drawer */}
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-[#151929] border-l border-white/[0.08] shadow-2xl animate-slide-in-right overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 p-6 pb-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+            <h2 className="text-lg font-semibold text-white leading-tight">{project.name}</h2>
           </div>
-        )}
-        {project.dri && (
+          <button
+            onClick={onClose}
+            className="p-1.5 text-[#A0A8C8] hover:text-white hover:bg-white/[0.08] rounded transition-colors flex-shrink-0"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 p-6 space-y-5">
+          {/* Meta row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge color={getStatusColor(project.status)}>{getStatusLabel(project.status)}</Badge>
+            <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
+            {project.department && (
+              <Badge color={project.department.color} dot>{project.department.name}</Badge>
+            )}
+            {project.objective_code && (
+              <span className="text-xs text-[#A0A8C8] bg-white/[0.08] px-2 py-0.5 rounded">
+                {project.objective_code}
+              </span>
+            )}
+          </div>
+
+          {/* Progress */}
           <div>
-            <p className="text-xs text-[#6B7394] mb-0.5">DRI</p>
-            <div className="flex items-center gap-1.5">
-              <Avatar name={project.dri.name} size="xs" />
-              <span className="text-white">{project.dri.name}</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-[#A0A8C8]">Overall progress</span>
+              <span className="text-xs font-medium text-white">{project.progress_percentage}%</span>
             </div>
+            <ProgressBar value={project.progress_percentage} size="sm" />
           </div>
-        )}
-        {project.description && (
-          <div className="col-span-2">
-            <p className="text-xs text-[#6B7394] mb-0.5">Description</p>
-            <p className="text-white whitespace-pre-line">{project.description}</p>
-          </div>
-        )}
-      </div>
 
-      {/* Tasks */}
-      {tasks.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-[#A0A8C8] uppercase tracking-wide mb-2">
-            Tasks ({tasks.length})
-          </p>
-          <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="flex items-center gap-3 px-3 py-2 rounded-md bg-white/[0.05]"
-              >
-                <div
-                  className={`w-2 h-2 rounded-full flex-shrink-0`}
-                  style={{ backgroundColor: getStatusColor(task.status) }}
-                />
-                <span className={`flex-1 text-sm min-w-0 truncate ${task.status === 'completed' ? 'line-through text-[#6B7394]' : 'text-white'}`}>
-                  {task.title}
-                </span>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {task.assignee?.name && (
-                    <div className="hidden sm:flex items-center gap-1">
-                      <Avatar name={task.assignee.name} size="xs" />
-                      <span className="text-xs text-[#A0A8C8]">{task.assignee.name}</span>
-                    </div>
-                  )}
-                  <Badge color={getStatusColor(task.status)} className="text-xs">
-                    {getTaskStatusLabel(task.status)}
-                  </Badge>
-                  {task.end_date && (
-                    <span className="text-xs text-[#6B7394] hidden md:block whitespace-nowrap">
-                      {formatDisplayDate(task.end_date)}
-                    </span>
-                  )}
+          {/* Dates / DRI / Description */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+            {(project.start_date || project.end_date) && (
+              <div>
+                <p className="text-xs text-[#6B7394] mb-0.5">Dates</p>
+                <p className="text-white">
+                  {formatDisplayDate(project.start_date)} – {formatDisplayDate(project.end_date)}
+                </p>
+              </div>
+            )}
+            {project.dri && (
+              <div>
+                <p className="text-xs text-[#6B7394] mb-0.5">DRI</p>
+                <div className="flex items-center gap-1.5">
+                  <Avatar name={project.dri.name} size="xs" />
+                  <span className="text-white">{project.dri.name}</span>
                 </div>
               </div>
-            ))}
+            )}
+            {project.description && (
+              <div className="col-span-2">
+                <p className="text-xs text-[#6B7394] mb-0.5">Description</p>
+                <p className="text-white whitespace-pre-line">{project.description}</p>
+              </div>
+            )}
           </div>
+
+          {/* Tasks */}
+          {tasks.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-[#A0A8C8] uppercase tracking-wide mb-2">
+                Tasks ({tasks.length})
+              </p>
+              <div className="space-y-1.5">
+                {tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-3 px-3 py-2 rounded-md bg-white/[0.05]"
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: getStatusColor(task.status) }}
+                    />
+                    <span className={`flex-1 text-sm min-w-0 truncate ${task.status === 'completed' ? 'line-through text-[#6B7394]' : 'text-white'}`}>
+                      {task.title}
+                    </span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {task.assignee?.name && (
+                        <div className="flex items-center gap-1">
+                          <Avatar name={task.assignee.name} size="xs" />
+                          <span className="text-xs text-[#A0A8C8]">{task.assignee.name}</span>
+                        </div>
+                      )}
+                      <Badge color={getStatusColor(task.status)} className="text-xs">
+                        {getTaskStatusLabel(task.status)}
+                      </Badge>
+                      {task.end_date && (
+                        <span className="text-xs text-[#6B7394] whitespace-nowrap">
+                          {formatDisplayDate(task.end_date)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </Modal>
+      </div>
+    </>
   );
 }
 
