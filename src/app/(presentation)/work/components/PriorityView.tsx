@@ -103,7 +103,11 @@ export function PriorityView({ projects, departments, onTaskToggle }: PriorityVi
     return acc;
   }, []);
 
-  // Move "no-deadline" group to the end
+  // Current month key for overdue labelling
+  const now = new Date();
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+  // Chronological order, no-deadline at the end
   const sorted = [
     ...groups.filter((g) => g.key !== 'no-deadline'),
     ...groups.filter((g) => g.key === 'no-deadline'),
@@ -160,6 +164,8 @@ export function PriorityView({ projects, departments, onTaskToggle }: PriorityVi
               return aOrder - bOrder;
             });
 
+            const isPast = key !== 'no-deadline' && key < currentMonthKey;
+
             return (
               <div key={key}>
                 <h3 className="text-sm font-semibold text-[#A0A8C8] uppercase tracking-wide mb-3 px-1">
@@ -167,6 +173,11 @@ export function PriorityView({ projects, departments, onTaskToggle }: PriorityVi
                   <span className="ml-2 font-normal normal-case tracking-normal text-[#6B7394]">
                     ({tasks.length})
                   </span>
+                  {isPast && (
+                    <span className="ml-2 text-xs font-normal normal-case tracking-normal text-[#E57373] bg-[#E57373]/10 px-1.5 py-0.5 rounded">
+                      overdue
+                    </span>
+                  )}
                 </h3>
                 <div className="space-y-4">
                   {deptGroups.map((dg) => (
