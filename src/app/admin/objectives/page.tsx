@@ -1,79 +1,82 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, Card, Modal, Input, Textarea, Select, Checkbox, Badge, ProgressBar } from '@/src/components/ui';
+import { Button, Card, Select, Badge, ProgressBar } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
 import { Department, Objective, KeyResult } from '@/src/types';
-import { UNIT_TYPE_OPTIONS, DIRECTION_OPTIONS } from '@/src/lib/constants';
 import { calculateProgress, formatValue, formatInputDate } from '@/src/lib/utils';
+import { fetchObjectivesPageData, saveObjective, deleteObjective, saveKeyResult, deleteKeyResult } from './lib/api';
+import { ObjectiveModal } from './components/ObjectiveModal';
+import { KeyResultModal } from './components/KeyResultModal';
+
+interface ObjForm {
+  department_id: string;
+  code: string;
+  title: string;
+  description: string;
+  is_top_objective: boolean;
+}
+
+interface KrForm {
+  code: string;
+  title: string;
+  description: string;
+  baseline_value: string;
+  baseline_label: string;
+  target_value: string;
+  target_label: string;
+  current_value: string;
+  current_label: string;
+  unit_type: 'number' | 'currency' | 'percentage';
+  direction: 'increase' | 'decrease';
+  target_date: string;
+  is_top_kr: boolean;
+}
+
+const defaultObjForm: ObjForm = { department_id: '', code: '', title: '', description: '', is_top_objective: false };
+const defaultKrForm: KrForm = {
+  code: '', title: '', description: '', baseline_value: '', baseline_label: '',
+  target_value: '', target_label: '', current_value: '0', current_label: '',
+  unit_type: 'number', direction: 'increase', target_date: '', is_top_kr: false,
+};
 
 export default function ObjectivesPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [objectives, setObjectives] = useState<Objective[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDeptId, setSelectedDeptId] = useState<string>('all');
+  const [expandedObjs, setExpandedObjs] = useState<Set<number>>(new Set());
 
-  // Objective modal
   const [objModalOpen, setObjModalOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<Objective | null>(null);
-  const [objForm, setObjForm] = useState({
-    department_id: '',
-    code: '',
-    title: '',
-    description: '',
-    is_top_objective: false,
-  });
+  const [objForm, setObjForm] = useState<ObjForm>(defaultObjForm);
 
-  // KR modal
   const [krModalOpen, setKrModalOpen] = useState(false);
   const [editingKr, setEditingKr] = useState<KeyResult | null>(null);
   const [krObjectiveId, setKrObjectiveId] = useState<number | null>(null);
-  const [krForm, setKrForm] = useState({
-    code: '',
-    title: '',
-    description: '',
-    baseline_value: '',
-    baseline_label: '',
-    target_value: '',
-    target_label: '',
-    current_value: '',
-    current_label: '',
-    unit_type: 'number' as 'number' | 'currency' | 'percentage',
-    direction: 'increase' as 'increase' | 'decrease',
-    target_date: '',
-    is_top_kr: false,
-  });
+  const [krForm, setKrForm] = useState<KrForm>(defaultKrForm);
 
   const [saving, setSaving] = useState(false);
-  const [expandedObjs, setExpandedObjs] = useState<Set<number>>(new Set());
 
-  const fetchData = async () => {
+  const loadData = async () => {
     try {
-      const [deptsRes, objsRes] = await Promise.all([
-        fetch('/api/departments'),
-        fetch('/api/objectives'),
-      ]);
-      const [depts, objs] = await Promise.all([deptsRes.json(), objsRes.json()]);
-      setDepartments(depts.data || []);
-      setObjectives(objs.data || []);
-      // Expand all by default
-      setExpandedObjs(new Set((objs.data || []).map((o: Objective) => o.id)));
+      const data = await fetchObjectivesPageData();
+      setDepartments(data.departments);
+      setObjectives(data.objectives);
+      setExpandedObjs(new Set(data.objectives.map((o: Objective) => o.id)));
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const filteredObjectives = selectedDeptId === 'all'
     ? objectives
     : objectives.filter(o => o.department_id === parseInt(selectedDeptId));
 
-  // Group objectives by department
   const objectivesByDept = filteredObjectives.reduce((acc, obj) => {
     const deptId = obj.department_id;
     if (!acc[deptId]) acc[deptId] = [];
@@ -82,16 +85,11 @@ export default function ObjectivesPage() {
   }, {} as Record<number, Objective[]>);
 
   const toggleExpand = (objId: number) => {
-    const newExpanded = new Set(expandedObjs);
-    if (newExpanded.has(objId)) {
-      newExpanded.delete(objId);
-    } else {
-      newExpanded.add(objId);
-    }
-    setExpandedObjs(newExpanded);
+    const next = new Set(expandedObjs);
+    next.has(objId) ? next.delete(objId) : next.add(objId);
+    setExpandedObjs(next);
   };
 
-  // Objective CRUD
   const openObjModal = (obj?: Objective, deptId?: number) => {
     if (obj) {
       setEditingObj(obj);
@@ -104,13 +102,7 @@ export default function ObjectivesPage() {
       });
     } else {
       setEditingObj(null);
-      setObjForm({
-        department_id: deptId?.toString() || '',
-        code: '',
-        title: '',
-        description: '',
-        is_top_objective: false,
-      });
+      setObjForm({ ...defaultObjForm, department_id: deptId?.toString() || '' });
     }
     setObjModalOpen(true);
   };
@@ -118,22 +110,10 @@ export default function ObjectivesPage() {
   const handleObjSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!objForm.department_id || !objForm.code || !objForm.title) return;
-
     setSaving(true);
     try {
-      const url = editingObj ? `/api/objectives/${editingObj.id}` : '/api/objectives';
-      const method = editingObj ? 'PUT' : 'POST';
-
-      await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...objForm,
-          department_id: parseInt(objForm.department_id),
-        }),
-      });
-
-      await fetchData();
+      await saveObjective(objForm, editingObj?.id);
+      await loadData();
       setObjModalOpen(false);
     } catch (error) {
       console.error('Error saving objective:', error);
@@ -145,14 +125,13 @@ export default function ObjectivesPage() {
   const handleObjDelete = async (obj: Objective) => {
     if (!confirm(`Delete "${obj.title}"? This will also delete all associated key results.`)) return;
     try {
-      await fetch(`/api/objectives/${obj.id}`, { method: 'DELETE' });
-      await fetchData();
+      await deleteObjective(obj.id);
+      await loadData();
     } catch (error) {
       console.error('Error deleting objective:', error);
     }
   };
 
-  // KR CRUD
   const openKrModal = (objectiveId: number, kr?: KeyResult) => {
     setKrObjectiveId(objectiveId);
     if (kr) {
@@ -174,49 +153,18 @@ export default function ObjectivesPage() {
       });
     } else {
       setEditingKr(null);
-      setKrForm({
-        code: '',
-        title: '',
-        description: '',
-        baseline_value: '',
-        baseline_label: '',
-        target_value: '',
-        target_label: '',
-        current_value: '0',
-        current_label: '',
-        unit_type: 'number',
-        direction: 'increase',
-        target_date: '',
-        is_top_kr: false,
-      });
+      setKrForm(defaultKrForm);
     }
     setKrModalOpen(true);
   };
 
   const handleKrSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!krForm.code || !krForm.title || !krForm.target_value) return;
-
+    if (!krForm.code || !krForm.title || !krForm.target_value || !krObjectiveId) return;
     setSaving(true);
     try {
-      const url = editingKr ? `/api/key-results/${editingKr.id}` : '/api/key-results';
-      const method = editingKr ? 'PUT' : 'POST';
-
-      await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...krForm,
-          objective_id: krObjectiveId,
-          baseline_value: krForm.baseline_value ? parseFloat(krForm.baseline_value) : null,
-          target_value: parseFloat(krForm.target_value),
-          current_value: parseFloat(krForm.current_value) || 0,
-          target_date: krForm.target_date || null,
-          is_top_kr: krForm.is_top_kr,
-        }),
-      });
-
-      await fetchData();
+      await saveKeyResult(krForm, krObjectiveId, editingKr?.id);
+      await loadData();
       setKrModalOpen(false);
     } catch (error) {
       console.error('Error saving key result:', error);
@@ -228,8 +176,8 @@ export default function ObjectivesPage() {
   const handleKrDelete = async (kr: KeyResult) => {
     if (!confirm(`Delete "${kr.title}"?`)) return;
     try {
-      await fetch(`/api/key-results/${kr.id}`, { method: 'DELETE' });
-      await fetchData();
+      await deleteKeyResult(kr.id);
+      await loadData();
     } catch (error) {
       console.error('Error deleting key result:', error);
     }
@@ -272,7 +220,6 @@ export default function ObjectivesPage() {
           {Object.entries(objectivesByDept).map(([deptId, deptObjectives]) => {
             const dept = departments.find(d => d.id === parseInt(deptId));
             if (!dept) return null;
-
             return (
               <Card key={deptId} padding="none">
                 <div
@@ -297,12 +244,8 @@ export default function ObjectivesPage() {
                       >
                         <div className="flex items-center gap-3">
                           <svg
-                            className={`w-4 h-4 text-[#6d6e6f] transition-transform ${
-                              expandedObjs.has(obj.id) ? 'rotate-90' : ''
-                            }`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                            className={`w-4 h-4 text-[#6d6e6f] transition-transform ${expandedObjs.has(obj.id) ? 'rotate-90' : ''}`}
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
@@ -396,166 +339,26 @@ export default function ObjectivesPage() {
         </div>
       )}
 
-      {/* Objective Modal */}
-      <Modal
+      <ObjectiveModal
         isOpen={objModalOpen}
         onClose={() => setObjModalOpen(false)}
-        title={editingObj ? 'Edit Objective' : 'Add Objective'}
-        size="lg"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setObjModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleObjSubmit} loading={saving}>
-              {editingObj ? 'Save Changes' : 'Add Objective'}
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleObjSubmit} className="space-y-4">
-          <Select
-            label="Department"
-            options={departments.map(d => ({ value: d.id.toString(), label: d.name }))}
-            value={objForm.department_id}
-            onChange={(e) => setObjForm({ ...objForm, department_id: e.target.value })}
-            placeholder="Select department"
-            required
-          />
-          <Input
-            label="Code"
-            value={objForm.code}
-            onChange={(e) => setObjForm({ ...objForm, code: e.target.value })}
-            placeholder="e.g., E-O1"
-            required
-          />
-          <Input
-            label="Title"
-            value={objForm.title}
-            onChange={(e) => setObjForm({ ...objForm, title: e.target.value })}
-            placeholder="Objective title"
-            required
-          />
-          <Textarea
-            label="Description"
-            value={objForm.description}
-            onChange={(e) => setObjForm({ ...objForm, description: e.target.value })}
-            placeholder="Optional description"
-          />
-        </form>
-      </Modal>
+        editingObj={editingObj}
+        form={objForm}
+        setForm={setObjForm}
+        departments={departments}
+        onSubmit={handleObjSubmit}
+        saving={saving}
+      />
 
-      {/* Key Result Modal */}
-      <Modal
+      <KeyResultModal
         isOpen={krModalOpen}
         onClose={() => setKrModalOpen(false)}
-        title={editingKr ? 'Edit Key Result' : 'Add Key Result'}
-        size="lg"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setKrModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleKrSubmit} loading={saving}>
-              {editingKr ? 'Save Changes' : 'Add Key Result'}
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleKrSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Code"
-              value={krForm.code}
-              onChange={(e) => setKrForm({ ...krForm, code: e.target.value })}
-              placeholder="e.g., KR1.1"
-              required
-            />
-            <Select
-              label="Unit Type"
-              options={UNIT_TYPE_OPTIONS.map(o => ({ value: o.value, label: o.label }))}
-              value={krForm.unit_type}
-              onChange={(e) => setKrForm({ ...krForm, unit_type: e.target.value as 'number' | 'currency' | 'percentage' })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#1e1f21] mb-1">Direction</label>
-            <div className="flex rounded-lg border border-[#e8ecee] overflow-hidden">
-              {DIRECTION_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setKrForm({ ...krForm, direction: opt.value as 'increase' | 'decrease' })}
-                  className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                    krForm.direction === opt.value
-                      ? 'bg-[#4573d2] text-white'
-                      : 'bg-white text-[#6d6e6f] hover:bg-[#f6f8f9]'
-                  }`}
-                >
-                  {opt.value === 'increase' ? '↑ ' : '↓ '}{opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <Input
-            label="Title"
-            value={krForm.title}
-            onChange={(e) => setKrForm({ ...krForm, title: e.target.value })}
-            placeholder="Key result title"
-            required
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Baseline Value"
-              type="number"
-              step="any"
-              value={krForm.baseline_value}
-              onChange={(e) => setKrForm({ ...krForm, baseline_value: e.target.value })}
-              placeholder="Starting value"
-            />
-            <Input
-              label="Baseline Label"
-              value={krForm.baseline_label}
-              onChange={(e) => setKrForm({ ...krForm, baseline_label: e.target.value })}
-              placeholder="e.g., per month"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Target Value"
-              type="number"
-              step="any"
-              value={krForm.target_value}
-              onChange={(e) => setKrForm({ ...krForm, target_value: e.target.value })}
-              placeholder="Target value"
-              required
-            />
-            <Input
-              label="Target Label"
-              value={krForm.target_label}
-              onChange={(e) => setKrForm({ ...krForm, target_label: e.target.value })}
-              placeholder="e.g., per month"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Current Value"
-              type="number"
-              step="any"
-              value={krForm.current_value}
-              onChange={(e) => setKrForm({ ...krForm, current_value: e.target.value })}
-              placeholder="Current progress"
-            />
-            <Input
-              label="Target Date"
-              type="date"
-              value={krForm.target_date}
-              onChange={(e) => setKrForm({ ...krForm, target_date: e.target.value })}
-            />
-          </div>
-          <Checkbox
-            label="Mark as Top KR (one per department, shown prominently)"
-            checked={krForm.is_top_kr}
-            onChange={(e) => setKrForm({ ...krForm, is_top_kr: e.target.checked })}
-          />
-        </form>
-      </Modal>
+        editingKr={editingKr}
+        form={krForm}
+        setForm={setKrForm}
+        onSubmit={handleKrSubmit}
+        saving={saving}
+      />
     </div>
   );
 }

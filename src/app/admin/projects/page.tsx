@@ -1,11 +1,49 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, Card, Modal, Input, Select, Badge, Avatar, ProgressBar } from '@/src/components/ui';
+import { Button, Card } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
 import { Project, ProjectTask, User, Objective, Department } from '@/src/types';
-import { PRIORITY_OPTIONS, PROJECT_STATUS_OPTIONS, STATUS_OPTIONS } from '@/src/lib/constants';
-import { formatDisplayDate, formatInputDate } from '@/src/lib/utils';
+import { formatInputDate } from '@/src/lib/utils';
+import { fetchProjectsPageData, saveProject, deleteProject, saveTask, deleteTask, reorderProjects, reorderTasks } from './lib/api';
+import { ProjectModal } from './components/ProjectModal';
+import { TaskModal } from './components/TaskModal';
+import { ProjectRow } from './components/ProjectRow';
+
+interface ProjectForm {
+  name: string;
+  department_id: string;
+  objective_id: string;
+  dri_user_id: string;
+  working_group_ids: number[];
+  priority: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  progress_percentage: string;
+  document_link: string;
+}
+
+interface TaskForm {
+  title: string;
+  assignee_user_id: string;
+  status: string;
+  progress_percentage: string;
+  start_date: string;
+  end_date: string;
+  document_link: string;
+}
+
+const defaultProjectForm: ProjectForm = {
+  name: '', department_id: '', objective_id: '', dri_user_id: '',
+  working_group_ids: [], priority: 'P1', status: 'not_started',
+  start_date: '', end_date: '', progress_percentage: '0', document_link: '',
+};
+
+const defaultTaskForm: TaskForm = {
+  title: '', assignee_user_id: '', status: 'not_started',
+  progress_percentage: '0', start_date: '', end_date: '', document_link: '',
+};
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -15,38 +53,16 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [expandedProjects, setExpandedProjects] = useState<Set<number>>(new Set());
 
-  // Project modal
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [workingGroupSearch, setWorkingGroupSearch] = useState('');
-  const [projectForm, setProjectForm] = useState({
-    name: '',
-    department_id: '',
-    objective_id: '',
-    dri_user_id: '',
-    working_group_ids: [] as number[],
-    priority: 'P1',
-    status: 'not_started',
-    start_date: '',
-    end_date: '',
-    progress_percentage: '0',
-    document_link: '',
-  });
+  const [projectForm, setProjectForm] = useState<ProjectForm>(defaultProjectForm);
   const [driSearch, setDriSearch] = useState('');
+  const [workingGroupSearch, setWorkingGroupSearch] = useState('');
 
-  // Task modal
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<ProjectTask | null>(null);
   const [taskProjectId, setTaskProjectId] = useState<number | null>(null);
-  const [taskForm, setTaskForm] = useState({
-    title: '',
-    assignee_user_id: '',
-    status: 'not_started',
-    progress_percentage: '0',
-    start_date: '',
-    end_date: '',
-    document_link: '',
-  });
+  const [taskForm, setTaskForm] = useState<TaskForm>(defaultTaskForm);
 
   const [saving, setSaving] = useState(false);
   const [draggedProjectId, setDraggedProjectId] = useState<number | null>(null);
@@ -54,49 +70,31 @@ export default function ProjectsPage() {
   const [dragOverProjectId, setDragOverProjectId] = useState<number | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<number | null>(null);
 
-  const fetchData = async () => {
+  const loadData = async () => {
     try {
-      const [projectsRes, usersRes, objectivesRes, departmentsRes] = await Promise.all([
-        fetch('/api/projects'),
-        fetch('/api/users'),
-        fetch('/api/objectives'),
-        fetch('/api/departments'),
-      ]);
-      const [projectsData, usersData, objectivesData, departmentsData] = await Promise.all([
-        projectsRes.json(),
-        usersRes.json(),
-        objectivesRes.json(),
-        departmentsRes.json(),
-      ]);
-      setProjects(projectsData.data || []);
-      setUsers(usersData.data || []);
-      setObjectives(objectivesData.data || []);
-      setDepartments(departmentsData.data || []);
+      const data = await fetchProjectsPageData();
+      setProjects(data.projects);
+      setUsers(data.users);
+      setObjectives(data.objectives);
+      setDepartments(data.departments);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const toggleExpand = (projectId: number) => {
-    const newExpanded = new Set(expandedProjects);
-    if (newExpanded.has(projectId)) {
-      newExpanded.delete(projectId);
-    } else {
-      newExpanded.add(projectId);
-    }
-    setExpandedProjects(newExpanded);
+    const next = new Set(expandedProjects);
+    next.has(projectId) ? next.delete(projectId) : next.add(projectId);
+    setExpandedProjects(next);
   };
 
-  // Project CRUD
   const openProjectModal = (project?: Project) => {
-    setWorkingGroupSearch('');
     setDriSearch('');
+    setWorkingGroupSearch('');
     if (project) {
       setEditingProject(project);
       setProjectForm({
@@ -114,19 +112,7 @@ export default function ProjectsPage() {
       });
     } else {
       setEditingProject(null);
-      setProjectForm({
-        name: '',
-        department_id: '',
-        objective_id: '',
-        dri_user_id: '',
-        working_group_ids: [],
-        priority: 'P1',
-        status: 'not_started',
-        start_date: '',
-        end_date: '',
-        progress_percentage: '0',
-        document_link: '',
-      });
+      setProjectForm(defaultProjectForm);
     }
     setProjectModalOpen(true);
   };
@@ -134,33 +120,10 @@ export default function ProjectsPage() {
   const handleProjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectForm.name) return;
-
     setSaving(true);
     try {
-      const url = editingProject ? `/api/projects/${editingProject.id}` : '/api/projects';
-      const method = editingProject ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...projectForm,
-          department_id: projectForm.department_id ? parseInt(projectForm.department_id) : null,
-          objective_id: projectForm.objective_id ? parseInt(projectForm.objective_id) : null,
-          dri_user_id: projectForm.dri_user_id ? parseInt(projectForm.dri_user_id) : null,
-          progress_percentage: parseInt(projectForm.progress_percentage),
-          start_date: projectForm.start_date || null,
-          end_date: projectForm.end_date || null,
-          document_link: projectForm.document_link || null,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save project');
-      }
-
-      await fetchData();
+      await saveProject(projectForm, editingProject?.id);
+      await loadData();
       setProjectModalOpen(false);
     } catch (error) {
       console.error('Error saving project:', error);
@@ -173,14 +136,13 @@ export default function ProjectsPage() {
   const handleProjectDelete = async (project: Project) => {
     if (!confirm(`Delete "${project.name}"? This will also delete all tasks.`)) return;
     try {
-      await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
-      await fetchData();
+      await deleteProject(project.id);
+      await loadData();
     } catch (error) {
       console.error('Error deleting project:', error);
     }
   };
 
-  // Task CRUD
   const openTaskModal = (projectId: number, task?: ProjectTask) => {
     setTaskProjectId(projectId);
     if (task) {
@@ -196,15 +158,7 @@ export default function ProjectsPage() {
       });
     } else {
       setEditingTask(null);
-      setTaskForm({
-        title: '',
-        assignee_user_id: '',
-        status: 'not_started',
-        progress_percentage: '0',
-        start_date: '',
-        end_date: '',
-        document_link: '',
-      });
+      setTaskForm(defaultTaskForm);
     }
     setTaskModalOpen(true);
   };
@@ -212,28 +166,10 @@ export default function ProjectsPage() {
   const handleTaskSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!taskForm.title || !taskProjectId) return;
-
     setSaving(true);
     try {
-      const url = editingTask
-        ? `/api/tasks/${editingTask.id}`
-        : `/api/projects/${taskProjectId}/tasks`;
-      const method = editingTask ? 'PUT' : 'POST';
-
-      await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...taskForm,
-          assignee_user_id: taskForm.assignee_user_id ? parseInt(taskForm.assignee_user_id) : null,
-          progress_percentage: parseInt(taskForm.progress_percentage),
-          start_date: taskForm.start_date || null,
-          end_date: taskForm.end_date || null,
-          document_link: taskForm.document_link || null,
-        }),
-      });
-
-      await fetchData();
+      await saveTask(taskForm, taskProjectId, editingTask?.id);
+      await loadData();
       setTaskModalOpen(false);
     } catch (error) {
       console.error('Error saving task:', error);
@@ -245,216 +181,122 @@ export default function ProjectsPage() {
   const handleTaskDelete = async (task: ProjectTask) => {
     if (!confirm(`Delete "${task.title}"?`)) return;
     try {
-      await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
-      await fetchData();
+      await deleteTask(task.id);
+      await loadData();
     } catch (error) {
       console.error('Error deleting task:', error);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    return PRIORITY_OPTIONS.find(p => p.value === priority)?.color || '#9ca0a4';
-  };
-
-  const getStatusColor = (status: string) => {
-    return STATUS_OPTIONS.find(s => s.value === status)?.color || '#9ca0a4';
-  };
-
-  const toggleWorkingGroupMember = (userId: number) => {
-    const newIds = projectForm.working_group_ids.includes(userId)
-      ? projectForm.working_group_ids.filter(id => id !== userId)
-      : [...projectForm.working_group_ids, userId];
-    setProjectForm({ ...projectForm, working_group_ids: newIds });
-  };
-
-  // Drag and drop handlers for projects
+  // Drag handlers — projects
   const handleProjectDragStart = (e: React.DragEvent, projectId: number) => {
     setDraggedProjectId(projectId);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '0.4';
-    }
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = '0.4';
   };
-
   const handleProjectDragEnd = (e: React.DragEvent) => {
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '1';
-    }
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = '1';
     setDraggedProjectId(null);
     setDragOverProjectId(null);
   };
-
   const handleProjectDragOver = (e: React.DragEvent, projectId: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverProjectId(projectId);
   };
-
-  const handleProjectDragLeave = () => {
-    setDragOverProjectId(null);
-  };
+  const handleProjectDragLeave = () => setDragOverProjectId(null);
 
   const handleProjectDrop = async (e: React.DragEvent, targetProjectId: number, departmentId: number | null) => {
     e.preventDefault();
     if (!draggedProjectId || draggedProjectId === targetProjectId) return;
 
-    // Store original state for potential rollback
     const originalProjects = [...projects];
-
-    // Get all projects in the same department
-    const deptProjects = projects.filter(p => p.department_id === departmentId)
-      .sort((a, b) => a.display_order - b.display_order);
-
+    const deptProjects = projects.filter(p => p.department_id === departmentId).sort((a, b) => a.display_order - b.display_order);
     const draggedIndex = deptProjects.findIndex(p => p.id === draggedProjectId);
     const targetIndex = deptProjects.findIndex(p => p.id === targetProjectId);
-
     if (draggedIndex === -1 || targetIndex === -1) return;
 
-    // Reorder the array
     const reordered = [...deptProjects];
     const [removed] = reordered.splice(draggedIndex, 1);
     reordered.splice(targetIndex, 0, removed);
 
-    // Create a map of updates for fast lookup
     const updatesMap = new Map<number, number>();
-    reordered.forEach((project, index) => {
-      updatesMap.set(project.id, index);
-    });
+    reordered.forEach((project, index) => updatesMap.set(project.id, index));
 
-    // Optimistic update - create completely new array with updated display_order
-    const updatedProjects = projects.map(project => {
-      if (updatesMap.has(project.id)) {
-        return { ...project, display_order: updatesMap.get(project.id)! };
-      }
-      return project;
-    });
+    setProjects(projects.map(p => updatesMap.has(p.id) ? { ...p, display_order: updatesMap.get(p.id)! } : p));
 
-    // Update state immediately
-    setProjects(updatedProjects);
-
-    // Prepare updates for API
-    const updates = Array.from(updatesMap.entries()).map(([id, display_order]) => ({
-      id,
-      display_order
-    }));
-
-    // Make API call in background
     try {
-      const response = await fetch('/api/projects/reorder-batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reorder');
-      }
+      await reorderProjects(Array.from(updatesMap.entries()).map(([id, display_order]) => ({ id, display_order })));
     } catch (error) {
       console.error('Error reordering project:', error);
-      // Revert to original state on error
       setProjects(originalProjects);
     }
   };
 
-  // Drag and drop handlers for tasks
+  // Drag handlers — tasks
   const handleTaskDragStart = (e: React.DragEvent, taskId: number) => {
     setDraggedTaskId(taskId);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '0.4';
-    }
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = '0.4';
   };
-
   const handleTaskDragEnd = (e: React.DragEvent) => {
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '1';
-    }
+    if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.opacity = '1';
     setDraggedTaskId(null);
     setDragOverTaskId(null);
   };
-
   const handleTaskDragOver = (e: React.DragEvent, taskId: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverTaskId(taskId);
   };
-
-  const handleTaskDragLeave = () => {
-    setDragOverTaskId(null);
-  };
+  const handleTaskDragLeave = () => setDragOverTaskId(null);
 
   const handleTaskDrop = async (e: React.DragEvent, targetTaskId: number, projectId: number) => {
     e.preventDefault();
     if (!draggedTaskId || draggedTaskId === targetTaskId) return;
 
-    // Store original state for potential rollback
     const originalProjects = [...projects];
-
-    // Get all tasks in the same project
     const project = projects.find(p => p.id === projectId);
-    if (!project || !project.tasks) return;
+    if (!project?.tasks) return;
 
     const projectTasks = [...project.tasks].sort((a, b) => a.display_order - b.display_order);
-
     const draggedIndex = projectTasks.findIndex(t => t.id === draggedTaskId);
     const targetIndex = projectTasks.findIndex(t => t.id === targetTaskId);
-
     if (draggedIndex === -1 || targetIndex === -1) return;
 
-    // Reorder the array
     const reordered = [...projectTasks];
     const [removed] = reordered.splice(draggedIndex, 1);
     reordered.splice(targetIndex, 0, removed);
 
-    // Create a map of updates for fast lookup
     const updatesMap = new Map<number, number>();
-    reordered.forEach((task, index) => {
-      updatesMap.set(task.id, index);
-    });
+    reordered.forEach((task, index) => updatesMap.set(task.id, index));
 
-    // Optimistic update - create completely new array with updated tasks
-    const updatedProjects = projects.map(p => {
-      if (p.id === projectId && p.tasks) {
-        return {
-          ...p,
-          tasks: p.tasks.map(task => {
-            if (updatesMap.has(task.id)) {
-              return { ...task, display_order: updatesMap.get(task.id)! };
-            }
-            return task;
-          })
-        };
-      }
-      return p;
-    });
+    setProjects(projects.map(p =>
+      p.id === projectId && p.tasks
+        ? { ...p, tasks: p.tasks.map(t => updatesMap.has(t.id) ? { ...t, display_order: updatesMap.get(t.id)! } : t) }
+        : p
+    ));
 
-    // Update state immediately
-    setProjects(updatedProjects);
-
-    // Prepare updates for API
-    const updates = Array.from(updatesMap.entries()).map(([id, display_order]) => ({
-      id,
-      display_order
-    }));
-
-    // Make API call in background
     try {
-      const response = await fetch('/api/tasks/reorder-batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reorder');
-      }
+      await reorderTasks(Array.from(updatesMap.entries()).map(([id, display_order]) => ({ id, display_order })));
     } catch (error) {
       console.error('Error reordering task:', error);
-      // Revert to original state on error
       setProjects(originalProjects);
     }
+  };
+
+  const dragHandlers = {
+    draggedProjectId, dragOverProjectId, draggedTaskId, dragOverTaskId,
+    onProjectDragStart: handleProjectDragStart,
+    onProjectDragEnd: handleProjectDragEnd,
+    onProjectDragOver: handleProjectDragOver,
+    onProjectDragLeave: handleProjectDragLeave,
+    onProjectDrop: handleProjectDrop,
+    onTaskDragStart: handleTaskDragStart,
+    onTaskDragEnd: handleTaskDragEnd,
+    onTaskDragOver: handleTaskDragOver,
+    onTaskDragLeave: handleTaskDragLeave,
+    onTaskDrop: handleTaskDrop,
   };
 
   return (
@@ -475,7 +317,6 @@ export default function ProjectsPage() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {/* Group projects by department */}
           {departments.map((dept) => {
             const deptProjects = projects
               .filter(p => p.department_id === dept.id)
@@ -484,224 +325,31 @@ export default function ProjectsPage() {
             return (
               <div key={dept.id}>
                 <div className="flex items-center gap-2 mb-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: dept.color }}
-                  />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: dept.color }} />
                   <h2 className="text-lg font-semibold text-[#1e1f21]">{dept.name}</h2>
                   <span className="text-sm text-[#6d6e6f]">({deptProjects.length} projects)</span>
                 </div>
                 <div className="space-y-3">
                   {deptProjects.map((project) => (
-                    <Card key={project.id} padding="none">
-                      <div
-                        draggable
-                        onDragStart={(e) => handleProjectDragStart(e, project.id)}
-                        onDragEnd={handleProjectDragEnd}
-                        onDragOver={(e) => handleProjectDragOver(e, project.id)}
-                        onDragLeave={handleProjectDragLeave}
-                        onDrop={(e) => handleProjectDrop(e, project.id, dept.id)}
-                        className={`flex items-center justify-between px-4 py-3 cursor-move hover:bg-[#f6f8f9] transition-all ${
-                          dragOverProjectId === project.id && draggedProjectId !== project.id
-                            ? 'border-t-2 border-[#4573d2]'
-                            : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-4 flex-1" onClick={() => toggleExpand(project.id)}>
-                          {/* Drag handle icon */}
-                          <svg
-                            className="w-4 h-4 text-[#9ca0a4] flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                          </svg>
-
-                          <svg
-                            className={`w-4 h-4 text-[#6d6e6f] transition-transform cursor-pointer ${
-                              expandedProjects.has(project.id) ? 'rotate-90' : ''
-                            }`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-
-                          <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
-
-                          <div className="flex-1 flex items-center gap-2">
-                            <span className="font-medium text-[#1e1f21]">{project.name}</span>
-                            {project.objective && (
-                              <span className="text-sm text-[#6d6e6f]">
-                                ({(project as unknown as { objective_code: string }).objective_code})
-                              </span>
-                            )}
-                            {project.document_link && (
-                              <a
-                                href={project.document_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
-                                title="View Document"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                1-pager
-                              </a>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-6">
-                            {project.dri && (
-                              <div className="flex items-center gap-2 min-w-[140px]">
-                                <Avatar name={project.dri.name} size="xs" />
-                                <span className="text-sm text-[#6d6e6f] truncate">{project.dri.name}</span>
-                              </div>
-                            )}
-
-                            {project.working_group && project.working_group.length > 0 && (
-                              <div className="flex -space-x-2">
-                                {project.working_group.slice(0, 3).map((user) => (
-                                  <Avatar key={user.id} name={user.name} size="xs" />
-                                ))}
-                                {project.working_group.length > 3 && (
-                                  <div className="w-6 h-6 rounded-full bg-[#e8ecee] flex items-center justify-center text-[10px] text-[#6d6e6f]">
-                                    +{project.working_group.length - 3}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            <div className="w-24">
-                              <ProgressBar value={project.progress_percentage} showLabel size="sm" />
-                            </div>
-
-                            <div className="text-sm text-[#6d6e6f] w-44 text-center whitespace-nowrap">
-                              {formatDisplayDate(project.start_date)} - {formatDisplayDate(project.end_date)}
-                            </div>
-
-                            <Badge color={getStatusColor(project.status)}>
-                              {PROJECT_STATUS_OPTIONS.find(s => s.value === project.status)?.label}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => openTaskModal(project.id)}
-                            className="px-3 py-1 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
-                          >
-                            + Task
-                          </button>
-                          <button
-                            onClick={() => openProjectModal(project)}
-                            className="px-3 py-1 text-xs font-medium text-[#6d6e6f] bg-[#f1f3f4] hover:bg-[#e8ecee] rounded-full transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleProjectDelete(project)}
-                            className="px-3 py-1 text-xs font-medium text-[#d93025] bg-[#fce8e6] hover:bg-[#f8d7da] rounded-full transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-
-                      {expandedProjects.has(project.id) && project.tasks && project.tasks.length > 0 && (
-                        <div className="border-t border-[#e8ecee] bg-[#f6f8f9]">
-                          {project.tasks
-                            .slice()
-                            .sort((a, b) => a.display_order - b.display_order)
-                            .map((task) => (
-                            <div
-                              key={task.id}
-                              draggable
-                              onDragStart={(e) => handleTaskDragStart(e, task.id)}
-                              onDragEnd={handleTaskDragEnd}
-                              onDragOver={(e) => handleTaskDragOver(e, task.id)}
-                              onDragLeave={handleTaskDragLeave}
-                              onDrop={(e) => handleTaskDrop(e, task.id, project.id)}
-                              className={`flex items-center px-4 py-3 pl-12 border-b border-[#edeef0] last:border-0 cursor-move hover:bg-[#edeef0] transition-all ${
-                                dragOverTaskId === task.id && draggedTaskId !== task.id
-                                  ? 'border-t-2 border-[#4573d2]'
-                                  : ''
-                              }`}
-                            >
-                              {/* Drag handle icon */}
-                              <svg
-                                className="w-3.5 h-3.5 text-[#9ca0a4] mr-3 flex-shrink-0"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                              </svg>
-                              <div className="flex-1 min-w-0 flex items-center gap-2">
-                                <span className="text-sm text-[#1e1f21]">{task.title}</span>
-                                {task.document_link && (
-                                  <a
-                                    href={task.document_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
-                                    title="View Document"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    doc
-                                  </a>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-6">
-                                <div className="w-36">
-                                  {task.assignee_user_id && (
-                                    <div className="flex items-center gap-2">
-                                      <Avatar name={(task as unknown as { assignee_name: string }).assignee_name || 'User'} size="xs" />
-                                      <span className="text-sm text-[#6d6e6f] truncate">
-                                        {(task as unknown as { assignee_name: string }).assignee_name}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="w-20">
-                                  <ProgressBar value={task.progress_percentage} showLabel size="sm" />
-                                </div>
-                                <div className="w-44 text-sm text-[#6d6e6f] text-center whitespace-nowrap">
-                                  {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
-                                </div>
-                                <div className="w-24">
-                                  <Badge color={getStatusColor(task.status)}>
-                                    {STATUS_OPTIONS.find(s => s.value === task.status)?.label}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Button variant="ghost" size="sm" onClick={() => openTaskModal(project.id, task)} title="Edit">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                    </svg>
-                                  </Button>
-                                  <Button variant="ghost" size="sm" onClick={() => handleTaskDelete(task)} title="Delete">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </Card>
+                    <ProjectRow
+                      key={project.id}
+                      project={project}
+                      isExpanded={expandedProjects.has(project.id)}
+                      onToggleExpand={toggleExpand}
+                      onEdit={openProjectModal}
+                      onDelete={handleProjectDelete}
+                      onAddTask={openTaskModal}
+                      onEditTask={openTaskModal}
+                      onDeleteTask={handleTaskDelete}
+                      departmentId={dept.id}
+                      {...dragHandlers}
+                    />
                   ))}
                 </div>
               </div>
             );
           })}
-          {/* Projects without department */}
+
           {projects.filter(p => !p.department_id).length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -716,397 +364,53 @@ export default function ProjectsPage() {
                   .filter(p => !p.department_id)
                   .sort((a, b) => a.display_order - b.display_order)
                   .map((project) => (
-                  <Card key={project.id} padding="none">
-                    <div
-                      draggable
-                      onDragStart={(e) => handleProjectDragStart(e, project.id)}
-                      onDragEnd={handleProjectDragEnd}
-                      onDragOver={(e) => handleProjectDragOver(e, project.id)}
-                      onDragLeave={handleProjectDragLeave}
-                      onDrop={(e) => handleProjectDrop(e, project.id, null)}
-                      className={`flex items-center justify-between px-4 py-3 cursor-move hover:bg-[#f6f8f9] transition-all ${
-                        dragOverProjectId === project.id && draggedProjectId !== project.id
-                          ? 'border-t-2 border-[#4573d2]'
-                          : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-4 flex-1" onClick={() => toggleExpand(project.id)}>
-                        {/* Drag handle icon */}
-                        <svg
-                          className="w-4 h-4 text-[#9ca0a4] flex-shrink-0"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                        </svg>
-
-                        <svg
-                          className={`w-4 h-4 text-[#6d6e6f] transition-transform cursor-pointer ${
-                            expandedProjects.has(project.id) ? 'rotate-90' : ''
-                          }`}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-
-                        <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
-
-                        <div className="flex-1 flex items-center gap-2">
-                          <span className="font-medium text-[#1e1f21]">{project.name}</span>
-                          {project.document_link && (
-                            <a
-                              href={project.document_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
-                              title="View Document"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              1-pager
-                            </a>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-6">
-                          {project.dri && (
-                            <div className="flex items-center gap-2 min-w-[140px]">
-                              <Avatar name={project.dri.name} size="xs" />
-                              <span className="text-sm text-[#6d6e6f] truncate">{project.dri.name}</span>
-                            </div>
-                          )}
-                          <div className="w-24">
-                            <ProgressBar value={project.progress_percentage} showLabel size="sm" />
-                          </div>
-                          <Badge color={getStatusColor(project.status)}>
-                            {PROJECT_STATUS_OPTIONS.find(s => s.value === project.status)?.label}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => openProjectModal(project)}
-                          className="px-3 py-1 text-xs font-medium text-[#6d6e6f] bg-[#f1f3f4] hover:bg-[#e8ecee] rounded-full transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleProjectDelete(project)}
-                          className="px-3 py-1 text-xs font-medium text-[#d93025] bg-[#fce8e6] hover:bg-[#f8d7da] rounded-full transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                    <ProjectRow
+                      key={project.id}
+                      project={project}
+                      isExpanded={expandedProjects.has(project.id)}
+                      onToggleExpand={toggleExpand}
+                      onEdit={openProjectModal}
+                      onDelete={handleProjectDelete}
+                      onAddTask={openTaskModal}
+                      onEditTask={openTaskModal}
+                      onDeleteTask={handleTaskDelete}
+                      departmentId={null}
+                      {...dragHandlers}
+                    />
+                  ))}
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Project Modal */}
-      <Modal
+      <ProjectModal
         isOpen={projectModalOpen}
         onClose={() => setProjectModalOpen(false)}
-        title={editingProject ? 'Edit Project' : 'Add Project'}
-        size="lg"
-        maxHeight={700}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setProjectModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleProjectSubmit} loading={saving}>
-              {editingProject ? 'Save Changes' : 'Add Project'}
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleProjectSubmit} className="space-y-4">
-          <Input
-            label="Project Name"
-            value={projectForm.name}
-            onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
-            placeholder="Enter project name"
-            required
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="Department"
-              options={[
-                { value: '', label: 'Select department' },
-                ...departments.map(d => ({ value: d.id.toString(), label: d.name })),
-              ]}
-              value={projectForm.department_id}
-              onChange={(e) => setProjectForm({ ...projectForm, department_id: e.target.value })}
-            />
-            <Select
-              label="Linked Objective"
-              options={[
-                { value: '', label: 'None' },
-                ...(projectForm.department_id
-                  ? objectives.filter(o => o.department_id === parseInt(projectForm.department_id))
-                  : objectives
-                ).map(o => ({ value: o.id.toString(), label: `${o.code} - ${o.title}` })),
-              ]}
-              value={projectForm.objective_id}
-              onChange={(e) => setProjectForm({ ...projectForm, objective_id: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#1e1f21] mb-2">DRI (Directly Responsible Individual)</label>
-            {/* Selected DRI */}
-            {projectForm.dri_user_id && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(() => {
-                  const user = users.find(u => u.id.toString() === projectForm.dri_user_id);
-                  if (!user) return null;
-                  return (
-                    <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#4573d2] text-white text-sm">
-                      <Avatar name={user.name} size="xs" />
-                      {user.name}
-                      <button
-                        type="button"
-                        onClick={() => setProjectForm({ ...projectForm, dri_user_id: '' })}
-                        className="ml-1 hover:bg-[#3562c1] rounded-full p-0.5"
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </span>
-                  );
-                })()}
-              </div>
-            )}
-            {/* DRI Search input */}
-            <div className="relative">
-              <Input
-                placeholder="Search users to assign as DRI..."
-                value={driSearch}
-                onChange={(e) => setDriSearch(e.target.value)}
-              />
-              {driSearch && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-[#e8ecee] rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {users
-                    .filter(u =>
-                      u.name.toLowerCase().includes(driSearch.toLowerCase()) &&
-                      u.id.toString() !== projectForm.dri_user_id
-                    )
-                    .map((user) => (
-                      <button
-                        key={user.id}
-                        type="button"
-                        onClick={() => {
-                          setProjectForm({ ...projectForm, dri_user_id: user.id.toString() });
-                          setDriSearch('');
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[#f6f8f9] text-sm"
-                      >
-                        <Avatar name={user.name} size="xs" />
-                        <span className="text-[#1e1f21]">{user.name}</span>
-                        {user.email && <span className="text-[#9ca0a4]">{user.email}</span>}
-                      </button>
-                    ))
-                  }
-                  {users.filter(u =>
-                    u.name.toLowerCase().includes(driSearch.toLowerCase()) &&
-                    u.id.toString() !== projectForm.dri_user_id
-                  ).length === 0 && (
-                    <div className="px-3 py-2 text-sm text-[#9ca0a4]">No users found</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#1e1f21] mb-2">Working Group</label>
-            {/* Selected members */}
-            {projectForm.working_group_ids.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {projectForm.working_group_ids.map((userId) => {
-                  const user = users.find(u => u.id === userId);
-                  if (!user) return null;
-                  return (
-                    <span
-                      key={userId}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#4573d2] text-white text-sm"
-                    >
-                      <Avatar name={user.name} size="xs" />
-                      {user.name}
-                      <button
-                        type="button"
-                        onClick={() => toggleWorkingGroupMember(userId)}
-                        className="ml-1 hover:bg-[#3562c1] rounded-full p-0.5"
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-            {/* Search input */}
-            <div className="relative">
-              <Input
-                placeholder="Search users to add..."
-                value={workingGroupSearch}
-                onChange={(e) => setWorkingGroupSearch(e.target.value)}
-              />
-              {workingGroupSearch && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-[#e8ecee] rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {users
-                    .filter(u =>
-                      u.name.toLowerCase().includes(workingGroupSearch.toLowerCase()) &&
-                      !projectForm.working_group_ids.includes(u.id)
-                    )
-                    .map((user) => (
-                      <button
-                        key={user.id}
-                        type="button"
-                        onClick={() => {
-                          toggleWorkingGroupMember(user.id);
-                          setWorkingGroupSearch('');
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[#f6f8f9] text-sm"
-                      >
-                        <Avatar name={user.name} size="xs" />
-                        <span className="text-[#1e1f21]">{user.name}</span>
-                        {user.email && <span className="text-[#9ca0a4]">{user.email}</span>}
-                      </button>
-                    ))
-                  }
-                  {users.filter(u =>
-                    u.name.toLowerCase().includes(workingGroupSearch.toLowerCase()) &&
-                    !projectForm.working_group_ids.includes(u.id)
-                  ).length === 0 && (
-                    <div className="px-3 py-2 text-sm text-[#9ca0a4]">No users found</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="Priority"
-              options={PRIORITY_OPTIONS.map(p => ({ value: p.value, label: p.label }))}
-              value={projectForm.priority}
-              onChange={(e) => setProjectForm({ ...projectForm, priority: e.target.value })}
-            />
-            <Select
-              label="Status"
-              options={PROJECT_STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }))}
-              value={projectForm.status}
-              onChange={(e) => setProjectForm({ ...projectForm, status: e.target.value })}
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <Input
-              label="Start Date"
-              type="date"
-              value={projectForm.start_date}
-              onChange={(e) => setProjectForm({ ...projectForm, start_date: e.target.value })}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              value={projectForm.end_date}
-              onChange={(e) => setProjectForm({ ...projectForm, end_date: e.target.value })}
-            />
-            <Input
-              label="Progress %"
-              type="number"
-              min="0"
-              max="100"
-              value={projectForm.progress_percentage}
-              onChange={(e) => setProjectForm({ ...projectForm, progress_percentage: e.target.value })}
-            />
-          </div>
-          <Input
-            label="Document Link"
-            type="url"
-            value={projectForm.document_link}
-            onChange={(e) => setProjectForm({ ...projectForm, document_link: e.target.value })}
-            placeholder="https://docs.google.com/..."
-          />
-        </form>
-      </Modal>
+        editingProject={editingProject}
+        form={projectForm}
+        setForm={setProjectForm}
+        users={users}
+        departments={departments}
+        objectives={objectives}
+        onSubmit={handleProjectSubmit}
+        saving={saving}
+        driSearch={driSearch}
+        setDriSearch={setDriSearch}
+        workingGroupSearch={workingGroupSearch}
+        setWorkingGroupSearch={setWorkingGroupSearch}
+      />
 
-      {/* Task Modal */}
-      <Modal
+      <TaskModal
         isOpen={taskModalOpen}
         onClose={() => setTaskModalOpen(false)}
-        title={editingTask ? 'Edit Task' : 'Add Task'}
-        size="md"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setTaskModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleTaskSubmit} loading={saving}>
-              {editingTask ? 'Save Changes' : 'Add Task'}
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleTaskSubmit} className="space-y-4">
-          <Input
-            label="Task Title"
-            value={taskForm.title}
-            onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
-            placeholder="Enter task title"
-            required
-          />
-          <div className="grid grid-cols-3 gap-4">
-            <Select
-              label="Assignee"
-              options={[
-                { value: '', label: 'Unassigned' },
-                ...users.map(u => ({ value: u.id.toString(), label: u.name })),
-              ]}
-              value={taskForm.assignee_user_id}
-              onChange={(e) => setTaskForm({ ...taskForm, assignee_user_id: e.target.value })}
-            />
-            <Select
-              label="Status"
-              options={STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }))}
-              value={taskForm.status}
-              onChange={(e) => setTaskForm({ ...taskForm, status: e.target.value })}
-            />
-            <Input
-              label="Progress %"
-              type="number"
-              min="0"
-              max="100"
-              value={taskForm.progress_percentage}
-              onChange={(e) => setTaskForm({ ...taskForm, progress_percentage: e.target.value })}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Start Date"
-              type="date"
-              value={taskForm.start_date}
-              onChange={(e) => setTaskForm({ ...taskForm, start_date: e.target.value })}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              value={taskForm.end_date}
-              onChange={(e) => setTaskForm({ ...taskForm, end_date: e.target.value })}
-            />
-          </div>
-          <Input
-            label="Document Link"
-            type="url"
-            value={taskForm.document_link}
-            onChange={(e) => setTaskForm({ ...taskForm, document_link: e.target.value })}
-            placeholder="https://docs.google.com/..."
-          />
-        </form>
-      </Modal>
+        editingTask={editingTask}
+        form={taskForm}
+        setForm={setTaskForm}
+        users={users}
+        onSubmit={handleTaskSubmit}
+        saving={saving}
+      />
     </div>
   );
 }

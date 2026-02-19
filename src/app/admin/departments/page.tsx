@@ -5,6 +5,7 @@ import { Button, Card, Table, Modal, Input, Textarea, Badge } from '@/src/compon
 import { PageHeader } from '@/src/components/layout';
 import { Department } from '@/src/types';
 import { COLORS } from '@/src/lib/constants';
+import { fetchDepartments, saveDepartment, deleteDepartment, reorderDepartments } from './lib/api';
 
 const colorOptions: string[] = [...COLORS.departments];
 
@@ -16,30 +17,22 @@ export default function DepartmentsPage() {
   const [formData, setFormData] = useState({ name: '', description: '', color: colorOptions[0] });
   const [saving, setSaving] = useState(false);
 
-  const fetchDepartments = async () => {
+  const loadDepartments = async () => {
     try {
-      const res = await fetch('/api/departments');
-      const data = await res.json();
-      setDepartments(data.data || []);
+      setDepartments(await fetchDepartments());
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error('Error loading departments:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
+  useEffect(() => { loadDepartments(); }, []);
 
   const openModal = (dept?: Department) => {
     if (dept) {
       setEditingDept(dept);
-      setFormData({
-        name: dept.name,
-        description: dept.description || '',
-        color: dept.color || colorOptions[0],
-      });
+      setFormData({ name: dept.name, description: dept.description || '', color: dept.color || colorOptions[0] });
     } else {
       setEditingDept(null);
       setFormData({ name: '', description: '', color: colorOptions[0] });
@@ -56,19 +49,10 @@ export default function DepartmentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
-
     setSaving(true);
     try {
-      const url = editingDept ? `/api/departments/${editingDept.id}` : '/api/departments';
-      const method = editingDept ? 'PUT' : 'POST';
-
-      await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      await fetchDepartments();
+      await saveDepartment(formData, editingDept?.id);
+      await loadDepartments();
       closeModal();
     } catch (error) {
       console.error('Error saving department:', error);
@@ -79,10 +63,9 @@ export default function DepartmentsPage() {
 
   const handleDelete = async (dept: Department) => {
     if (!confirm(`Delete ${dept.name}? This will also delete all associated objectives and key results.`)) return;
-
     try {
-      await fetch(`/api/departments/${dept.id}`, { method: 'DELETE' });
-      await fetchDepartments();
+      await deleteDepartment(dept.id);
+      await loadDepartments();
     } catch (error) {
       console.error('Error deleting department:', error);
     }
@@ -91,26 +74,11 @@ export default function DepartmentsPage() {
   const handleMove = async (dept: Department, direction: 'up' | 'down') => {
     const currentIndex = departments.findIndex(d => d.id === dept.id);
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-
     if (targetIndex < 0 || targetIndex >= departments.length) return;
-
     const targetDept = departments[targetIndex];
-
     try {
-      // Swap display_order values
-      await Promise.all([
-        fetch(`/api/departments/${dept.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ display_order: targetDept.display_order }),
-        }),
-        fetch(`/api/departments/${targetDept.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ display_order: dept.display_order }),
-        }),
-      ]);
-      await fetchDepartments();
+      await reorderDepartments(dept.id, targetDept.id, dept.display_order, targetDept.display_order);
+      await loadDepartments();
     } catch (error) {
       console.error('Error reordering departments:', error);
     }
@@ -122,10 +90,7 @@ export default function DepartmentsPage() {
       header: 'Name',
       render: (dept: Department) => (
         <div className="flex items-center gap-3">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: dept.color }}
-          />
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: dept.color }} />
           <span className="font-medium">{dept.name}</span>
         </div>
       ),
@@ -133,9 +98,7 @@ export default function DepartmentsPage() {
     {
       key: 'description',
       header: 'Description',
-      render: (dept: Department) => (
-        <span className="text-[#6d6e6f]">{dept.description || '-'}</span>
-      ),
+      render: (dept: Department) => <span className="text-[#6d6e6f]">{dept.description || '-'}</span>,
     },
     {
       key: 'order',
@@ -143,13 +106,11 @@ export default function DepartmentsPage() {
       width: '120px',
       render: (dept: Department) => {
         const index = departments.findIndex(d => d.id === dept.id);
-        const isFirst = index === 0;
-        const isLast = index === departments.length - 1;
         return (
           <div className="flex items-center gap-1">
             <button
               onClick={() => handleMove(dept, 'up')}
-              disabled={isFirst}
+              disabled={index === 0}
               className="p-1 rounded hover:bg-[#e8ecee] disabled:opacity-30 disabled:cursor-not-allowed"
               title="Move up"
             >
@@ -159,7 +120,7 @@ export default function DepartmentsPage() {
             </button>
             <button
               onClick={() => handleMove(dept, 'down')}
-              disabled={isLast}
+              disabled={index === departments.length - 1}
               className="p-1 rounded hover:bg-[#e8ecee] disabled:opacity-30 disabled:cursor-not-allowed"
               title="Move down"
             >
@@ -177,12 +138,8 @@ export default function DepartmentsPage() {
       width: '100px',
       render: (dept: Department) => (
         <div className="flex items-center gap-2 justify-end">
-          <Button variant="ghost" size="sm" onClick={() => openModal(dept)}>
-            Edit
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => handleDelete(dept)}>
-            Delete
-          </Button>
+          <Button variant="ghost" size="sm" onClick={() => openModal(dept)}>Edit</Button>
+          <Button variant="ghost" size="sm" onClick={() => handleDelete(dept)}>Delete</Button>
         </div>
       ),
     },
@@ -215,9 +172,7 @@ export default function DepartmentsPage() {
         title={editingDept ? 'Edit Department' : 'Add Department'}
         footer={
           <>
-            <Button variant="secondary" onClick={closeModal}>
-              Cancel
-            </Button>
+            <Button variant="secondary" onClick={closeModal}>Cancel</Button>
             <Button onClick={handleSubmit} loading={saving}>
               {editingDept ? 'Save Changes' : 'Add Department'}
             </Button>
@@ -246,9 +201,7 @@ export default function DepartmentsPage() {
                   key={color}
                   type="button"
                   onClick={() => setFormData({ ...formData, color })}
-                  className={`w-8 h-8 rounded-full transition-all ${
-                    formData.color === color ? 'ring-2 ring-offset-2 ring-[#4573d2]' : ''
-                  }`}
+                  className={`w-8 h-8 rounded-full transition-all ${formData.color === color ? 'ring-2 ring-offset-2 ring-[#4573d2]' : ''}`}
                   style={{ backgroundColor: color }}
                 />
               ))}
