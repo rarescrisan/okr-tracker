@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, Avatar, Badge, ProgressBar, Modal } from '@/src/components/ui';
 import { formatDisplayDate } from '@/src/lib/utils';
-import { Project, ProjectTask } from '@/src/types';
+import { Project, ProjectTask, Department } from '@/src/types';
 import { getStatusColor, getStatusLabel, getTaskStatusLabel, getPriorityColor } from '../utils/helpers';
 
 type FlatTask = ProjectTask & {
@@ -17,6 +17,7 @@ interface PriorityViewProps {
     objective_code?: string;
     tasks?: (ProjectTask & { assignee_name?: string })[];
   })[];
+  departments: Department[];
   onTaskToggle: (taskId: number, currentStatus: string) => void;
 }
 
@@ -36,8 +37,18 @@ function getMonthLabel(key: string): string {
   return year !== currentYear ? `${label} ${year}` : label;
 }
 
-export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
+const STATUS_FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'not_started', label: 'Not Started' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'blocked', label: 'Blocked' },
+] as const;
+
+type StatusFilterValue = typeof STATUS_FILTERS[number]['value'];
+
+export function PriorityView({ projects, departments, onTaskToggle }: PriorityViewProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
   const selectedProject = projects.find((p) => p.id === selectedProjectId) ?? null;
 
   const flatTasks: FlatTask[] = projects.flatMap((project) =>
@@ -58,7 +69,11 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
   );
 
   const activeTasks = [...flatTasks]
-    .filter((t) => t.status !== 'completed')
+    .filter((t) => {
+      if (t.status === 'completed') return false;
+      if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+      return true;
+    })
     .sort((a, b) => {
       if (!a.end_date && !b.end_date) return 0;
       if (!a.end_date) return 1;
@@ -66,7 +81,9 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
       return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
     });
 
-  if (activeTasks.length === 0) {
+  const totalActive = flatTasks.filter((t) => t.status !== 'completed');
+
+  if (totalActive.length === 0) {
     return (
       <Card>
         <div className="p-8 text-center text-[#A0A8C8]">No tasks found.</div>
@@ -94,28 +111,93 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
 
   return (
     <>
-      <div className="space-y-6">
-        {sorted.map(({ key, tasks }) => (
-          <div key={key}>
-            <h3 className="text-sm font-semibold text-[#A0A8C8] uppercase tracking-wide mb-2 px-1">
-              {getMonthLabel(key)}
-              <span className="ml-2 font-normal normal-case tracking-normal text-[#6B7394]">
-                ({tasks.length})
+      {/* Status filter pills */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        {STATUS_FILTERS.map((f) => {
+          const count = f.value === 'all'
+            ? totalActive.length
+            : totalActive.filter((t) => t.status === f.value).length;
+          const isActive = statusFilter === f.value;
+          return (
+            <button
+              key={f.value}
+              onClick={() => setStatusFilter(f.value)}
+              className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                isActive
+                  ? 'bg-[#2A3152] border-[#4573d2] text-white'
+                  : 'bg-transparent border-white/[0.12] text-[#A0A8C8] hover:border-white/[0.25] hover:text-white'
+              }`}
+            >
+              {f.label}
+              <span className={`ml-1.5 text-xs ${isActive ? 'text-[#A0A8C8]' : 'text-[#6B7394]'}`}>
+                {count}
               </span>
-            </h3>
-            <div className="space-y-2">
-              {tasks.map((task) => (
-                <DeadlineTaskRow
-                  key={task.id}
-                  task={task}
-                  onToggle={onTaskToggle}
-                  onProjectClick={setSelectedProjectId}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+            </button>
+          );
+        })}
       </div>
+
+      {activeTasks.length === 0 ? (
+        <Card>
+          <div className="p-8 text-center text-[#A0A8C8]">No tasks match the selected filter.</div>
+        </Card>
+      ) : (
+        <div className="space-y-8">
+          {sorted.map(({ key, tasks }) => {
+            // Group tasks by department within this month
+            const deptGroups = tasks.reduce<{ name: string; color: string | undefined; tasks: FlatTask[] }[]>((acc, task) => {
+              const name = task.department_name ?? 'No Department';
+              const existing = acc.find((g) => g.name === name);
+              if (existing) {
+                existing.tasks.push(task);
+              } else {
+                acc.push({ name, color: task.department_color, tasks: [task] });
+              }
+              return acc;
+            }, []).sort((a, b) => {
+              const aOrder = departments.find((d) => d.name === a.name)?.display_order ?? Infinity;
+              const bOrder = departments.find((d) => d.name === b.name)?.display_order ?? Infinity;
+              return aOrder - bOrder;
+            });
+
+            return (
+              <div key={key}>
+                <h3 className="text-sm font-semibold text-[#A0A8C8] uppercase tracking-wide mb-3 px-1">
+                  {getMonthLabel(key)}
+                  <span className="ml-2 font-normal normal-case tracking-normal text-[#6B7394]">
+                    ({tasks.length})
+                  </span>
+                </h3>
+                <div className="space-y-4">
+                  {deptGroups.map((dg) => (
+                    <div key={dg.name}>
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        {dg.color && dg.name !== 'No Department' && (
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dg.color }} />
+                        )}
+                        <span className="text-xs font-semibold text-[#6B7394] uppercase tracking-wide">
+                          {dg.name}
+                        </span>
+                        <span className="text-xs text-[#6B7394]">({dg.tasks.length})</span>
+                      </div>
+                      <div className="space-y-2">
+                        {dg.tasks.map((task) => (
+                          <DeadlineTaskRow
+                            key={task.id}
+                            task={task}
+                            onToggle={onTaskToggle}
+                            onProjectClick={setSelectedProjectId}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {selectedProject && (
         <ProjectDetailModal

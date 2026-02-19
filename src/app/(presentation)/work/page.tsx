@@ -144,6 +144,7 @@ export default function WorkTracker() {
       ) : viewMode === 'priority' ? (
         <PriorityView
           projects={filteredProjects}
+          departments={departments}
           onTaskToggle={handleTaskToggle}
         />
       ) : (
