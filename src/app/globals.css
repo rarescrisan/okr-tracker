@@ -5,11 +5,11 @@
 }
 
 @theme inline {
-  --color-background: #f6f8f9;
-  --color-foreground: #1e1f21;
-  --color-primary: #4573d2;
-  --color-secondary: #6d6e6f;
-  --color-border: #e8ecee;
+  --color-background: #1A1F36;
+  --color-foreground: #FFFFFF;
+  --color-primary: #00C8FF;
+  --color-secondary: #A0A8C8;
+  --color-border: rgba(255,255,255,0.08);
   --font-sans: var(--font-inter);
 }
 
@@ -36,16 +36,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #151929;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: rgba(255,255,255,0.15);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: rgba(255,255,255,0.25);
 }
 
 /* Focus styles */
@@ -91,21 +91,22 @@ table {
 /* Form input styles */
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.5;
+  filter: invert(1);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
+  opacity: 0.8;
 }
 
 /* Checkbox styling */
 input[type="checkbox"] {
-  accent-color: #4573d2;
+  accent-color: #00C8FF;
 }
 
 /* Selection styling */
 ::selection {
-  background-color: rgba(69, 115, 210, 0.2);
+  background-color: rgba(0, 200, 255, 0.2);
 }
 
 /* Prevent text selection on UI elements */
@@ -126,9 +127,9 @@ input[type="checkbox"] {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #e8ecee 25%,
-    #f6f8f9 50%,
-    #e8ecee 75%
+    rgba(255,255,255,0.05) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.05) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;

@@ -32,11 +32,11 @@ interface ProjectRowProps {
 }
 
 function getPriorityColor(priority: string) {
-  return PRIORITY_OPTIONS.find(p => p.value === priority)?.color || '#9ca0a4';
+  return PRIORITY_OPTIONS.find(p => p.value === priority)?.color || '#6B7394';
 }
 
 function getStatusColor(status: string) {
-  return STATUS_OPTIONS.find(s => s.value === status)?.color || '#9ca0a4';
+  return STATUS_OPTIONS.find(s => s.value === status)?.color || '#6B7394';
 }
 
 export function ProjectRow({
@@ -73,18 +73,18 @@ export function ProjectRow({
         onDragOver={(e) => onProjectDragOver(e, project.id)}
         onDragLeave={onProjectDragLeave}
         onDrop={(e) => onProjectDrop(e, project.id, departmentId)}
-        className={`flex items-center justify-between px-4 py-3 cursor-move hover:bg-[#f6f8f9] transition-all ${
+        className={`flex items-center justify-between px-4 py-3 cursor-move hover:bg-white/[0.04] transition-all ${
           dragOverProjectId === project.id && draggedProjectId !== project.id
-            ? 'border-t-2 border-[#4573d2]'
+            ? 'border-t-2 border-[#00C8FF]'
             : ''
         }`}
       >
         <div className="flex items-center gap-4 flex-1" onClick={() => onToggleExpand(project.id)}>
-          <svg className="w-4 h-4 text-[#9ca0a4] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 text-[#6B7394] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
           </svg>
           <svg
-            className={`w-4 h-4 text-[#6d6e6f] transition-transform cursor-pointer ${isExpanded ? 'rotate-90' : ''}`}
+            className={`w-4 h-4 text-[#A0A8C8] transition-transform cursor-pointer ${isExpanded ? 'rotate-90' : ''}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -95,9 +95,9 @@ export function ProjectRow({
           <Badge color={getPriorityColor(project.priority)}>{project.priority}</Badge>
 
           <div className="flex-1 flex items-center gap-2">
-            <span className="font-medium text-[#1e1f21]">{project.name}</span>
+            <span className="font-medium text-white">{project.name}</span>
             {project.objective && (
-              <span className="text-sm text-[#6d6e6f]">
+              <span className="text-sm text-[#A0A8C8]">
                 ({(project as unknown as { objective_code: string }).objective_code})
               </span>
             )}
@@ -106,7 +106,7 @@ export function ProjectRow({
                 href={project.document_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                className="px-2 py-0.5 text-xs font-medium text-[#00C8FF] bg-[#00C8FF]/[0.12] hover:bg-[#00C8FF]/[0.20] rounded-full transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 1-pager
@@ -118,7 +118,7 @@ export function ProjectRow({
             {project.dri && (
               <div className="flex items-center gap-2 min-w-[140px]">
                 <Avatar name={project.dri.name} size="xs" />
-                <span className="text-sm text-[#6d6e6f] truncate">{project.dri.name}</span>
+                <span className="text-sm text-[#A0A8C8] truncate">{project.dri.name}</span>
               </div>
             )}
             {project.working_group && project.working_group.length > 0 && (
@@ -127,7 +127,7 @@ export function ProjectRow({
                   <Avatar key={user.id} name={user.name} size="xs" />
                 ))}
                 {project.working_group.length > 3 && (
-                  <div className="w-6 h-6 rounded-full bg-[#e8ecee] flex items-center justify-center text-[10px] text-[#6d6e6f]">
+                  <div className="w-6 h-6 rounded-full bg-white/[0.10] flex items-center justify-center text-[10px] text-[#A0A8C8]">
                     +{project.working_group.length - 3}
                   </div>
                 )}
@@ -136,7 +136,7 @@ export function ProjectRow({
             <div className="w-24">
               <ProgressBar value={project.progress_percentage} showLabel size="sm" />
             </div>
-            <div className="text-sm text-[#6d6e6f] w-44 text-center whitespace-nowrap">
+            <div className="text-sm text-[#A0A8C8] w-44 text-center whitespace-nowrap">
               {formatDisplayDate(project.start_date)} - {formatDisplayDate(project.end_date)}
             </div>
             <Badge color={getStatusColor(project.status)}>
@@ -148,19 +148,19 @@ export function ProjectRow({
         <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => onAddTask(project.id)}
-            className="px-3 py-1 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+            className="px-3 py-1 text-xs font-medium text-[#00C8FF] bg-[#00C8FF]/[0.12] hover:bg-[#00C8FF]/[0.20] rounded-full transition-colors"
           >
             + Task
           </button>
           <button
             onClick={() => onEdit(project)}
-            className="px-3 py-1 text-xs font-medium text-[#6d6e6f] bg-[#f1f3f4] hover:bg-[#e8ecee] rounded-full transition-colors"
+            className="px-3 py-1 text-xs font-medium text-[#A0A8C8] bg-white/[0.08] hover:bg-white/[0.12] rounded-full transition-colors"
           >
             Edit
           </button>
           <button
             onClick={() => onDelete(project)}
-            className="px-3 py-1 text-xs font-medium text-[#d93025] bg-[#fce8e6] hover:bg-[#f8d7da] rounded-full transition-colors"
+            className="px-3 py-1 text-xs font-medium text-[#FF4D6A] bg-[#FF4D6A]/[0.12] hover:bg-[#FF4D6A]/[0.20] rounded-full transition-colors"
           >
             Delete
           </button>
@@ -168,7 +168,7 @@ export function ProjectRow({
       </div>
 
       {isExpanded && project.tasks && project.tasks.length > 0 && (
-        <div className="border-t border-[#e8ecee] bg-[#f6f8f9]">
+        <div className="border-t border-white/[0.08] bg-white/[0.02]">
           {project.tasks
             .slice()
             .sort((a, b) => a.display_order - b.display_order)
@@ -181,23 +181,23 @@ export function ProjectRow({
                 onDragOver={(e) => onTaskDragOver(e, task.id)}
                 onDragLeave={onTaskDragLeave}
                 onDrop={(e) => onTaskDrop(e, task.id, project.id)}
-                className={`flex items-center px-4 py-3 pl-12 border-b border-[#edeef0] last:border-0 cursor-move hover:bg-[#edeef0] transition-all ${
+                className={`flex items-center px-4 py-3 pl-12 border-b border-white/[0.05] last:border-0 cursor-move hover:bg-white/[0.04] transition-all ${
                   dragOverTaskId === task.id && draggedTaskId !== task.id
-                    ? 'border-t-2 border-[#4573d2]'
+                    ? 'border-t-2 border-[#00C8FF]'
                     : ''
                 }`}
               >
-                <svg className="w-3.5 h-3.5 text-[#9ca0a4] mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3.5 h-3.5 text-[#6B7394] mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
                 </svg>
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                  <span className="text-sm text-[#1e1f21]">{task.title}</span>
+                  <span className="text-sm text-white">{task.title}</span>
                   {task.document_link && (
                     <a
                       href={task.document_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                      className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-[#00C8FF] bg-[#00C8FF]/[0.12] hover:bg-[#00C8FF]/[0.20] rounded-full transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +212,7 @@ export function ProjectRow({
                     {task.assignee_user_id && (
                       <div className="flex items-center gap-2">
                         <Avatar name={(task as unknown as { assignee_name: string }).assignee_name || 'User'} size="xs" />
-                        <span className="text-sm text-[#6d6e6f] truncate">
+                        <span className="text-sm text-[#A0A8C8] truncate">
                           {(task as unknown as { assignee_name: string }).assignee_name}
                         </span>
                       </div>
@@ -221,7 +221,7 @@ export function ProjectRow({
                   <div className="w-20">
                     <ProgressBar value={task.progress_percentage} showLabel size="sm" />
                   </div>
-                  <div className="w-44 text-sm text-[#6d6e6f] text-center whitespace-nowrap">
+                  <div className="w-44 text-sm text-[#A0A8C8] text-center whitespace-nowrap">
                     {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
                   </div>
                   <div className="w-24">

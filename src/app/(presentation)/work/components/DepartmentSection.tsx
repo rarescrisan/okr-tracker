@@ -56,8 +56,8 @@ function DepartmentHeader({ name, color, count }: DepartmentHeaderProps) {
         className="w-3 h-3 rounded-full flex-shrink-0"
         style={{ backgroundColor: color }}
       />
-      <h2 className="text-base sm:text-lg font-semibold text-[#1e1f21]">{name}</h2>
-      <span className="text-sm text-[#6d6e6f]">({count})</span>
+      <h2 className="text-base sm:text-lg font-semibold text-white">{name}</h2>
+      <span className="text-sm text-[#A0A8C8]">({count})</span>
     </div>
   );
 }

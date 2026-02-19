@@ -69,7 +69,7 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
   if (activeTasks.length === 0) {
     return (
       <Card>
-        <div className="p-8 text-center text-[#6d6e6f]">No tasks found.</div>
+        <div className="p-8 text-center text-[#A0A8C8]">No tasks found.</div>
       </Card>
     );
   }
@@ -97,9 +97,9 @@ export function PriorityView({ projects, onTaskToggle }: PriorityViewProps) {
       <div className="space-y-6">
         {sorted.map(({ key, tasks }) => (
           <div key={key}>
-            <h3 className="text-sm font-semibold text-[#6d6e6f] uppercase tracking-wide mb-2 px-1">
+            <h3 className="text-sm font-semibold text-[#A0A8C8] uppercase tracking-wide mb-2 px-1">
               {getMonthLabel(key)}
-              <span className="ml-2 font-normal normal-case tracking-normal text-[#9ca0a4]">
+              <span className="ml-2 font-normal normal-case tracking-normal text-[#6B7394]">
                 ({tasks.length})
               </span>
             </h3>
@@ -146,7 +146,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
     onProjectClick(task.project_id);
   };
 
-  const borderColor = task.department_color ?? '#e8ecee';
+  const borderColor = task.department_color ?? 'rgba(255,255,255,0.08)';
 
   return (
     <Card
@@ -160,7 +160,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`font-medium ${isCompleted ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'}`}>
+            <span className={`font-medium ${isCompleted ? 'text-[#A0A8C8] line-through' : 'text-white'}`}>
               {task.title}
             </span>
             <button onClick={handleProjectClick} className="flex-shrink-0 hover:opacity-75 transition-opacity">
@@ -180,10 +180,10 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
           {task.assignee_user_id ? (
             <>
               <Avatar name={task.assignee_name || 'User'} size="xs" />
-              <span className="text-sm text-[#6d6e6f] truncate">{task.assignee_name}</span>
+              <span className="text-sm text-[#A0A8C8] truncate">{task.assignee_name}</span>
             </>
           ) : (
-            <span className="text-sm text-[#9ca0a4]">Unassigned</span>
+            <span className="text-sm text-[#6B7394]">Unassigned</span>
           )}
         </div>
 
@@ -191,7 +191,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
           <ProgressBar value={task.progress_percentage} showLabel size="sm" />
         </div>
 
-        <div className="hidden xl:block text-sm text-[#6d6e6f] w-44 flex-shrink-0 text-center whitespace-nowrap">
+        <div className="hidden xl:block text-sm text-[#A0A8C8] w-44 flex-shrink-0 text-center whitespace-nowrap">
           {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
         </div>
 
@@ -206,7 +206,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
           <TaskCheckbox isCompleted={isCompleted} onToggle={handleToggle} className="mt-0.5" />
 
           <div className="flex-1 min-w-0">
-            <span className={`text-sm block mb-1.5 ${isCompleted ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'}`}>
+            <span className={`text-sm block mb-1.5 ${isCompleted ? 'text-[#A0A8C8] line-through' : 'text-white'}`}>
               {task.title}
             </span>
 
@@ -230,10 +230,10 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
               {task.assignee_user_id ? (
                 <div className="flex items-center gap-1.5">
                   <Avatar name={task.assignee_name || 'User'} size="xs" />
-                  <span className="text-xs text-[#6d6e6f]">{task.assignee_name}</span>
+                  <span className="text-xs text-[#A0A8C8]">{task.assignee_name}</span>
                 </div>
               ) : (
-                <span className="text-xs text-[#9ca0a4]">Unassigned</span>
+                <span className="text-xs text-[#6B7394]">Unassigned</span>
               )}
               <div className="w-20">
                 <ProgressBar value={task.progress_percentage} showLabel size="sm" />
@@ -241,7 +241,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
             </div>
 
             {(task.start_date || task.end_date) && (
-              <div className="text-xs text-[#9ca0a4] mt-1.5">
+              <div className="text-xs text-[#6B7394] mt-1.5">
                 {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
               </div>
             )}
@@ -269,11 +269,11 @@ function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
       <div className="flex items-start justify-between gap-4 mb-5">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
-          <h2 className="text-lg font-semibold text-[#1e1f21] leading-tight">{project.name}</h2>
+          <h2 className="text-lg font-semibold text-white leading-tight">{project.name}</h2>
         </div>
         <button
           onClick={onClose}
-          className="p-1 text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9] rounded transition-colors flex-shrink-0"
+          className="p-1 text-[#A0A8C8] hover:text-white hover:bg-white/[0.08] rounded transition-colors flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -289,7 +289,7 @@ function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
           <Badge color={project.department.color} dot>{project.department.name}</Badge>
         )}
         {project.objective_code && (
-          <span className="text-xs text-[#6d6e6f] bg-[#f0f2f4] px-2 py-0.5 rounded">
+          <span className="text-xs text-[#A0A8C8] bg-white/[0.08] px-2 py-0.5 rounded">
             {project.objective_code}
           </span>
         )}
@@ -298,8 +298,8 @@ function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
       {/* Progress */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-[#6d6e6f]">Overall progress</span>
-          <span className="text-xs font-medium text-[#1e1f21]">{project.progress_percentage}%</span>
+          <span className="text-xs text-[#A0A8C8]">Overall progress</span>
+          <span className="text-xs font-medium text-white">{project.progress_percentage}%</span>
         </div>
         <ProgressBar value={project.progress_percentage} size="sm" />
       </div>
@@ -308,25 +308,25 @@ function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-5 text-sm">
         {(project.start_date || project.end_date) && (
           <div>
-            <p className="text-xs text-[#9ca0a4] mb-0.5">Dates</p>
-            <p className="text-[#1e1f21]">
+            <p className="text-xs text-[#6B7394] mb-0.5">Dates</p>
+            <p className="text-white">
               {formatDisplayDate(project.start_date)} – {formatDisplayDate(project.end_date)}
             </p>
           </div>
         )}
         {project.dri && (
           <div>
-            <p className="text-xs text-[#9ca0a4] mb-0.5">DRI</p>
+            <p className="text-xs text-[#6B7394] mb-0.5">DRI</p>
             <div className="flex items-center gap-1.5">
               <Avatar name={project.dri.name} size="xs" />
-              <span className="text-[#1e1f21]">{project.dri.name}</span>
+              <span className="text-white">{project.dri.name}</span>
             </div>
           </div>
         )}
         {project.description && (
           <div className="col-span-2">
-            <p className="text-xs text-[#9ca0a4] mb-0.5">Description</p>
-            <p className="text-[#1e1f21] whitespace-pre-line">{project.description}</p>
+            <p className="text-xs text-[#6B7394] mb-0.5">Description</p>
+            <p className="text-white whitespace-pre-line">{project.description}</p>
           </div>
         )}
       </div>
@@ -334,34 +334,34 @@ function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
       {/* Tasks */}
       {tasks.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-[#6d6e6f] uppercase tracking-wide mb-2">
+          <p className="text-xs font-semibold text-[#A0A8C8] uppercase tracking-wide mb-2">
             Tasks ({tasks.length})
           </p>
           <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-3 px-3 py-2 rounded-md bg-[#f6f8f9]"
+                className="flex items-center gap-3 px-3 py-2 rounded-md bg-white/[0.05]"
               >
                 <div
                   className={`w-2 h-2 rounded-full flex-shrink-0`}
                   style={{ backgroundColor: getStatusColor(task.status) }}
                 />
-                <span className={`flex-1 text-sm min-w-0 truncate ${task.status === 'completed' ? 'line-through text-[#9ca0a4]' : 'text-[#1e1f21]'}`}>
+                <span className={`flex-1 text-sm min-w-0 truncate ${task.status === 'completed' ? 'line-through text-[#6B7394]' : 'text-white'}`}>
                   {task.title}
                 </span>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {task.assignee?.name && (
                     <div className="hidden sm:flex items-center gap-1">
                       <Avatar name={task.assignee.name} size="xs" />
-                      <span className="text-xs text-[#6d6e6f]">{task.assignee.name}</span>
+                      <span className="text-xs text-[#A0A8C8]">{task.assignee.name}</span>
                     </div>
                   )}
                   <Badge color={getStatusColor(task.status)} className="text-xs">
                     {getTaskStatusLabel(task.status)}
                   </Badge>
                   {task.end_date && (
-                    <span className="text-xs text-[#9ca0a4] hidden md:block whitespace-nowrap">
+                    <span className="text-xs text-[#6B7394] hidden md:block whitespace-nowrap">
                       {formatDisplayDate(task.end_date)}
                     </span>
                   )}
@@ -387,8 +387,8 @@ function TaskCheckbox({ isCompleted, onToggle, className = '' }: TaskCheckboxPro
       onClick={onToggle}
       className={`w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center cursor-pointer transition-colors ${
         isCompleted
-          ? 'bg-[#5da283] border-[#5da283] hover:bg-[#4a8a6b]'
-          : 'border-[#c4c7c9] hover:border-[#5da283] hover:bg-[#f0f9f5]'
+          ? 'bg-[#2DD4A8] border-[#2DD4A8] hover:bg-[#25B890]'
+          : 'border-white/[0.20] hover:border-[#2DD4A8] hover:bg-[#2DD4A8]/[0.10]'
       } ${className}`}
       title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
     >

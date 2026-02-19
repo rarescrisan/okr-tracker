@@ -7,11 +7,11 @@ interface EmptyStateProps {
 export function EmptyState({ hasProjects }: EmptyStateProps) {
   return (
     <Card>
-      <div className="p-8 text-center text-[#6d6e6f]">
+      <div className="p-8 text-center text-[#A0A8C8]">
         {!hasProjects ? (
           <>
             No projects found.{' '}
-            <a href="/admin/projects" className="text-[#4573d2]">
+            <a href="/admin/projects" className="text-[#00C8FF]">
               Create a project
             </a>{' '}
             to get started.

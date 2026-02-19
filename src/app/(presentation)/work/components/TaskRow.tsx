@@ -19,11 +19,11 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
   return (
     <div>
       {/* Desktop View */}
-      <div className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-2.5 pl-12 hover:bg-[#edeef0] transition-colors">
+      <div className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-2.5 pl-12 hover:bg-white/[0.04] transition-colors">
         <TaskCheckbox isCompleted={isCompleted} onToggle={handleToggle} />
 
         <span className={`flex-1 text-sm ${
-          isCompleted ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'
+          isCompleted ? 'text-[#A0A8C8] line-through' : 'text-white'
         }`}>
           {task.title}
         </span>
@@ -32,10 +32,10 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
           {task.assignee_user_id ? (
             <div className="flex items-center gap-2">
               <Avatar name={task.assignee_name || 'User'} size="xs" />
-              <span className="text-sm text-[#6d6e6f] truncate">{task.assignee_name}</span>
+              <span className="text-sm text-[#A0A8C8] truncate">{task.assignee_name}</span>
             </div>
           ) : (
-            <span className="text-sm text-[#9ca0a4]">Unassigned</span>
+            <span className="text-sm text-[#6B7394]">Unassigned</span>
           )}
         </div>
 
@@ -43,7 +43,7 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
           <ProgressBar value={task.progress_percentage} showLabel size="sm" />
         </div>
 
-        <div className="hidden xl:block text-sm text-[#6d6e6f] w-44 flex-shrink-0 text-center whitespace-nowrap">
+        <div className="hidden xl:block text-sm text-[#A0A8C8] w-44 flex-shrink-0 text-center whitespace-nowrap">
           {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
         </div>
 
@@ -53,13 +53,13 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
       </div>
 
       {/* Mobile View */}
-      <div className="md:hidden px-4 py-3 pl-8 hover:bg-[#edeef0] transition-colors">
+      <div className="md:hidden px-4 py-3 pl-8 hover:bg-white/[0.04] transition-colors">
         <div className="flex items-start gap-3">
           <TaskCheckbox isCompleted={isCompleted} onToggle={handleToggle} />
 
           <div className="flex-1 min-w-0">
             <span className={`text-sm block ${
-              isCompleted ? 'text-[#6d6e6f] line-through' : 'text-[#1e1f21]'
+              isCompleted ? 'text-[#A0A8C8] line-through' : 'text-white'
             }`}>
               {task.title}
             </span>
@@ -69,7 +69,7 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
                 {getTaskStatusLabel(task.status)}
               </Badge>
               {task.assignee_user_id && (
-                <span className="text-xs text-[#6d6e6f]">{task.assignee_name}</span>
+                <span className="text-xs text-[#A0A8C8]">{task.assignee_name}</span>
               )}
             </div>
 
@@ -78,7 +78,7 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
             </div>
 
             {(task.start_date || task.end_date) && (
-              <div className="text-xs text-[#9ca0a4] mt-1">
+              <div className="text-xs text-[#6B7394] mt-1">
                 {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
               </div>
             )}
@@ -102,8 +102,8 @@ function TaskCheckbox({ isCompleted, onToggle }: TaskCheckboxProps) {
         isCompleted ? 'mt-0' : 'md:mt-0 mt-0.5'
       } flex items-center justify-center cursor-pointer transition-colors ${
         isCompleted
-          ? 'bg-[#5da283] border-[#5da283] hover:bg-[#4a8a6b]'
-          : 'border-[#c4c7c9] hover:border-[#5da283] hover:bg-[#f0f9f5]'
+          ? 'bg-[#2DD4A8] border-[#2DD4A8] hover:bg-[#25B890]'
+          : 'border-white/[0.20] hover:border-[#2DD4A8] hover:bg-[#2DD4A8]/[0.10]'
       }`}
       title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
     >

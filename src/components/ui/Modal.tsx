@@ -47,18 +47,18 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer, m
       />
       <div
         className={cn(
-          'relative w-full mx-4 bg-white rounded-lg shadow-xl flex flex-col',
+          'relative w-full mx-4 bg-[#212840] rounded-lg shadow-xl flex flex-col border border-white/[0.08]',
           'animate-in fade-in zoom-in-95 duration-200',
           sizeClasses[size]
         )}
         style={maxHeight ? { maxHeight: `${maxHeight}px` } : undefined}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8ecee] shrink-0">
-            <h2 className="text-lg font-semibold text-[#1e1f21]">{title}</h2>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] shrink-0">
+            <h2 className="text-lg font-semibold text-white">{title}</h2>
             <button
               onClick={onClose}
-              className="p-1 text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9] rounded transition-colors"
+              className="p-1 text-[#A0A8C8] hover:text-white hover:bg-white/[0.08] rounded transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -68,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer, m
         )}
         <div className={cn('px-6 py-4', maxHeight && 'overflow-y-auto flex-1')}>{children}</div>
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e8ecee] bg-[#f6f8f9] rounded-b-lg shrink-0">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.08] bg-[#2A3152] rounded-b-lg shrink-0">
             {footer}
           </div>
         )}

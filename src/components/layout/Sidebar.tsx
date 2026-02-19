@@ -56,7 +56,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 min-h-[calc(100vh-3.5rem)] bg-white border-r border-[#e8ecee]">
+    <aside className="w-64 min-h-[calc(100vh-3.5rem)] bg-[#151929] border-r border-white/[0.08]">
       <nav className="p-4">
         <ul className="space-y-1">
           {sidebarItems.map((item) => {
@@ -68,8 +68,8 @@ export function Sidebar() {
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive
-                      ? 'bg-[#4573d2]/10 text-[#4573d2]'
-                      : 'text-[#6d6e6f] hover:text-[#1e1f21] hover:bg-[#f6f8f9]'
+                      ? 'bg-[#00C8FF]/[0.12] text-[#00C8FF]'
+                      : 'text-[#A0A8C8] hover:text-white hover:bg-white/[0.06]'
                   )}
                 >
                   {item.icon}

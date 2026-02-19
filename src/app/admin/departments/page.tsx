@@ -98,7 +98,7 @@ export default function DepartmentsPage() {
     {
       key: 'description',
       header: 'Description',
-      render: (dept: Department) => <span className="text-[#6d6e6f]">{dept.description || '-'}</span>,
+      render: (dept: Department) => <span className="text-[#A0A8C8]">{dept.description || '-'}</span>,
     },
     {
       key: 'order',
@@ -111,7 +111,7 @@ export default function DepartmentsPage() {
             <button
               onClick={() => handleMove(dept, 'up')}
               disabled={index === 0}
-              className="p-1 rounded hover:bg-[#e8ecee] disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed"
               title="Move up"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -121,7 +121,7 @@ export default function DepartmentsPage() {
             <button
               onClick={() => handleMove(dept, 'down')}
               disabled={index === departments.length - 1}
-              className="p-1 rounded hover:bg-[#e8ecee] disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed"
               title="Move down"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -155,7 +155,8 @@ export default function DepartmentsPage() {
 
       <Card padding="none">
         {loading ? (
-          <div className="p-8 text-center text-[#6d6e6f]">Loading...</div>
+          <div className="p-8 text-center text-[#A0A8C8]">Loading...</div>
+
         ) : (
           <Table
             columns={columns}
@@ -194,14 +195,14 @@ export default function DepartmentsPage() {
             placeholder="Brief description of the department"
           />
           <div>
-            <label className="block text-sm font-medium text-[#1e1f21] mb-2">Color</label>
+            <label className="block text-sm font-medium text-[#A0A8C8] mb-2">Color</label>
             <div className="flex gap-2">
               {colorOptions.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setFormData({ ...formData, color })}
-                  className={`w-8 h-8 rounded-full transition-all ${formData.color === color ? 'ring-2 ring-offset-2 ring-[#4573d2]' : ''}`}
+                  className={`w-8 h-8 rounded-full transition-all ${formData.color === color ? 'ring-2 ring-offset-2 ring-[#00C8FF] ring-offset-[#212840]' : ''}`}
                   style={{ backgroundColor: color }}
                 />
               ))}

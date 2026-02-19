@@ -71,7 +71,7 @@ export default function XRequestsPage() {
     return (
       <div>
         <PageHeader title="X-Requests" description="Cross-team requests" />
-        <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">Loading...</div></Card>
       </div>
     );
   }
@@ -80,7 +80,7 @@ export default function XRequestsPage() {
     return (
       <div>
         <PageHeader title="X-Requests" description="Cross-team requests" />
-        <Card><div className="p-8 text-center text-[#6d6e6f]">{error}</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">{error}</div></Card>
       </div>
     );
   }
@@ -90,7 +90,7 @@ export default function XRequestsPage() {
       <select
         value={filterStatus}
         onChange={e => setFilterStatus(e.target.value)}
-        className="h-9 px-3 text-sm rounded-md border border-[#e8ecee] bg-white text-[#1e1f21] focus:outline-none focus:ring-2 focus:ring-[#4573d2]"
+        className="h-9 px-3 text-sm rounded-md border border-white/[0.12] bg-[#1A1F36] text-white focus:outline-none focus:ring-2 focus:ring-[#00C8FF]"
       >
         <option value="">All statuses</option>
         {X_REQUEST_STATUS_OPTIONS.map(o => (
@@ -99,7 +99,7 @@ export default function XRequestsPage() {
       </select>
       <button
         onClick={() => setShowForm(true)}
-        className="h-9 px-4 text-sm font-medium bg-[#4573d2] text-white rounded-md hover:bg-[#3a62b3] transition-colors"
+        className="h-9 px-4 text-sm font-medium bg-[#2A3152] text-[#00C8FF] border border-[#00C8FF]/[0.4] rounded-md hover:bg-[#00C8FF]/[0.12] transition-colors"
       >
         + New Request
       </button>
@@ -116,7 +116,7 @@ export default function XRequestsPage() {
 
       {filtered.length === 0 ? (
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">
+          <div className="p-8 text-center text-[#A0A8C8]">
             {filterStatus ? 'No requests match this filter.' : 'No requests yet. Submit one to get started.'}
           </div>
         </Card>

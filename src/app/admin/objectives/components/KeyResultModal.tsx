@@ -63,8 +63,8 @@ export function KeyResultModal({ isOpen, onClose, editingKr, form, setForm, onSu
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#1e1f21] mb-1">Direction</label>
-          <div className="flex rounded-lg border border-[#e8ecee] overflow-hidden">
+          <label className="block text-sm font-medium text-[#A0A8C8] mb-1">Direction</label>
+          <div className="flex rounded-lg border border-white/[0.08] overflow-hidden">
             {DIRECTION_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -72,8 +72,8 @@ export function KeyResultModal({ isOpen, onClose, editingKr, form, setForm, onSu
                 onClick={() => setForm({ ...form, direction: opt.value as 'increase' | 'decrease' })}
                 className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                   form.direction === opt.value
-                    ? 'bg-[#4573d2] text-white'
-                    : 'bg-white text-[#6d6e6f] hover:bg-[#f6f8f9]'
+                    ? 'bg-[#00C8FF] text-[#0F1326]'
+                    : 'bg-transparent text-[#A0A8C8] hover:bg-white/[0.06]'
                 }`}
               >
                 {opt.value === 'increase' ? '↑ ' : '↓ '}{opt.label}

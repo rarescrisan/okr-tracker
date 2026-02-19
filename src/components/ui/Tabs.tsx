@@ -16,7 +16,7 @@ export interface TabsProps {
 
 export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn('flex border-b border-[#e8ecee]', className)}>
+    <div className={cn('flex border-b border-white/[0.08]', className)}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -24,13 +24,13 @@ export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
           className={cn(
             'px-4 py-2 text-sm font-medium transition-colors relative',
             activeTab === tab.id
-              ? 'text-[#4573d2]'
-              : 'text-[#6d6e6f] hover:text-[#1e1f21]'
+              ? 'text-[#00C8FF]'
+              : 'text-[#A0A8C8] hover:text-white'
           )}
         >
           {tab.label}
           {activeTab === tab.id && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4573d2]" />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00C8FF]" />
           )}
         </button>
       ))}

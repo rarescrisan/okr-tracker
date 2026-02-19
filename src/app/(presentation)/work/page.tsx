@@ -93,7 +93,7 @@ export default function WorkTracker() {
       <div>
         <PageHeader title="Work Tracker" description="View all projects and tasks" />
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">Loading...</div>
+          <div className="p-8 text-center text-[#A0A8C8]">Loading...</div>
         </Card>
       </div>
     );
@@ -104,20 +104,20 @@ export default function WorkTracker() {
       <div>
         <PageHeader title="Work Tracker" description="View all projects and tasks" />
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">{error}</div>
+          <div className="p-8 text-center text-[#A0A8C8]">{error}</div>
         </Card>
       </div>
     );
   }
 
   const viewToggle = (
-    <div className="flex items-center gap-1 bg-[#f0f2f4] rounded-lg p-1">
+    <div className="flex items-center gap-1 bg-white/[0.08] rounded-lg p-1">
       <button
         onClick={() => setViewMode('department')}
         className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
           viewMode === 'department'
-            ? 'bg-white text-[#1e1f21] shadow-sm'
-            : 'text-[#6d6e6f] hover:text-[#1e1f21]'
+            ? 'bg-[#2A3152] text-white shadow-sm'
+            : 'text-[#A0A8C8] hover:text-white'
         }`}
       >
         Department
@@ -126,8 +126,8 @@ export default function WorkTracker() {
         onClick={() => setViewMode('priority')}
         className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
           viewMode === 'priority'
-            ? 'bg-white text-[#1e1f21] shadow-sm'
-            : 'text-[#6d6e6f] hover:text-[#1e1f21]'
+            ? 'bg-[#2A3152] text-white shadow-sm'
+            : 'text-[#A0A8C8] hover:text-white'
         }`}
       >
         Deadline

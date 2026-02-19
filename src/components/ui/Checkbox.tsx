@@ -21,14 +21,14 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           type="checkbox"
           id={checkboxId}
           className={cn(
-            'w-4 h-4 rounded border-[#e8ecee] text-[#4573d2]',
-            'focus:ring-2 focus:ring-[#4573d2] focus:ring-offset-0',
+            'w-4 h-4 rounded border-white/[0.15] text-[#00C8FF]',
+            'focus:ring-2 focus:ring-[#00C8FF] focus:ring-offset-0 focus:ring-offset-transparent',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}
           {...props}
         />
         {label && (
-          <span className="text-sm text-[#1e1f21]">{label}</span>
+          <span className="text-sm text-white">{label}</span>
         )}
       </label>
     );

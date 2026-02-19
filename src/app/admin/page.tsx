@@ -49,10 +49,10 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { label: 'Team Members', value: stats.users, color: '#4573d2', icon: '👥' },
-    { label: 'Departments', value: stats.departments, color: '#5da283', icon: '🏢' },
-    { label: 'Objectives', value: stats.objectives, color: '#aa62e3', icon: '🎯' },
-    { label: 'Projects', value: stats.projects, color: '#f1bd6c', icon: '📋' },
+    { label: 'Team Members', value: stats.users, color: '#00C8FF', icon: '👥' },
+    { label: 'Departments', value: stats.departments, color: '#2DD4A8', icon: '🏢' },
+    { label: 'Objectives', value: stats.objectives, color: '#AA62E3', icon: '🎯' },
+    { label: 'Projects', value: stats.projects, color: '#FFB020', icon: '📋' },
   ];
 
   return (
@@ -72,10 +72,10 @@ export default function AdminDashboard() {
               {stat.icon}
             </div>
             <div>
-              <p className="text-2xl font-semibold text-[#1e1f21]">
+              <p className="text-2xl font-semibold text-white">
                 {loading ? '-' : stat.value}
               </p>
-              <p className="text-sm text-[#6d6e6f]">{stat.label}</p>
+              <p className="text-sm text-[#A0A8C8]">{stat.label}</p>
             </div>
           </Card>
         ))}
@@ -83,49 +83,49 @@ export default function AdminDashboard() {
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <h3 className="text-lg font-semibold text-[#1e1f21] mb-4">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
           <div className="space-y-2">
             <a
               href="/admin/users"
-              className="block p-3 rounded-lg hover:bg-[#f6f8f9] transition-colors"
+              className="block p-3 rounded-lg hover:bg-white/[0.06] transition-colors"
             >
-              <span className="font-medium text-[#1e1f21]">Manage Users</span>
-              <p className="text-sm text-[#6d6e6f]">Add or edit team members</p>
+              <span className="font-medium text-white">Manage Users</span>
+              <p className="text-sm text-[#A0A8C8]">Add or edit team members</p>
             </a>
             <a
               href="/admin/objectives"
-              className="block p-3 rounded-lg hover:bg-[#f6f8f9] transition-colors"
+              className="block p-3 rounded-lg hover:bg-white/[0.06] transition-colors"
             >
-              <span className="font-medium text-[#1e1f21]">Manage OKRs</span>
-              <p className="text-sm text-[#6d6e6f]">Create objectives and key results</p>
+              <span className="font-medium text-white">Manage OKRs</span>
+              <p className="text-sm text-[#A0A8C8]">Create objectives and key results</p>
             </a>
             <a
               href="/admin/projects"
-              className="block p-3 rounded-lg hover:bg-[#f6f8f9] transition-colors"
+              className="block p-3 rounded-lg hover:bg-white/[0.06] transition-colors"
             >
-              <span className="font-medium text-[#1e1f21]">Manage Projects</span>
-              <p className="text-sm text-[#6d6e6f]">Track project progress and tasks</p>
+              <span className="font-medium text-white">Manage Projects</span>
+              <p className="text-sm text-[#A0A8C8]">Track project progress and tasks</p>
             </a>
           </div>
         </Card>
 
         <Card>
-          <h3 className="text-lg font-semibold text-[#1e1f21] mb-4">Getting Started</h3>
-          <ol className="space-y-3 text-sm text-[#6d6e6f]">
+          <h3 className="text-lg font-semibold text-white mb-4">Getting Started</h3>
+          <ol className="space-y-3 text-sm text-[#A0A8C8]">
             <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-[#4573d2] text-white rounded-full flex items-center justify-center text-xs font-medium">1</span>
+              <span className="flex-shrink-0 w-6 h-6 bg-[#00C8FF] text-[#0F1326] rounded-full flex items-center justify-center text-xs font-medium">1</span>
               <span>Add team members who will be assigned to projects</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-[#4573d2] text-white rounded-full flex items-center justify-center text-xs font-medium">2</span>
+              <span className="flex-shrink-0 w-6 h-6 bg-[#00C8FF] text-[#0F1326] rounded-full flex items-center justify-center text-xs font-medium">2</span>
               <span>Create departments to organize your objectives</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-[#4573d2] text-white rounded-full flex items-center justify-center text-xs font-medium">3</span>
+              <span className="flex-shrink-0 w-6 h-6 bg-[#00C8FF] text-[#0F1326] rounded-full flex items-center justify-center text-xs font-medium">3</span>
               <span>Define objectives and their key results (KRs)</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-[#4573d2] text-white rounded-full flex items-center justify-center text-xs font-medium">4</span>
+              <span className="flex-shrink-0 w-6 h-6 bg-[#00C8FF] text-[#0F1326] rounded-full flex items-center justify-center text-xs font-medium">4</span>
               <span>Create projects and assign them to objectives</span>
             </li>
           </ol>

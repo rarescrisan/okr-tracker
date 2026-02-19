@@ -40,19 +40,19 @@ export function AnnouncementCard({ announcement, onDelete }: AnnouncementCardPro
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="text-sm font-medium text-[#1e1f21]">{announcement.author_name}</span>
+                <span className="text-sm font-medium text-white">{announcement.author_name}</span>
                 {announcement.department && (
                   <DeptChip name={announcement.department.name} color={announcement.department.color} />
                 )}
-                <span className="text-xs text-[#9ca0a4]">{timeAgo(announcement.created_at)}</span>
+                <span className="text-xs text-[#6B7394]">{timeAgo(announcement.created_at)}</span>
               </div>
-              <p className="text-sm text-[#1e1f21] whitespace-pre-line">{announcement.description}</p>
+              <p className="text-sm text-[#A0A8C8] whitespace-pre-line">{announcement.description}</p>
             </div>
           </div>
 
           <button
             onClick={() => onDelete(announcement.id)}
-            className="p-1.5 text-[#9ca0a4] hover:text-[#f06a6a] hover:bg-[#fff0f0] rounded transition-colors shrink-0"
+            className="p-1.5 text-[#6B7394] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/[0.12] rounded transition-colors shrink-0"
             title="Delete announcement"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

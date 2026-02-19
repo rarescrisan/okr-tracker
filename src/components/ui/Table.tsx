@@ -31,11 +31,11 @@ export function Table<T>({
     <div className={cn('overflow-x-auto', className)}>
       <table className="w-full">
         <thead>
-          <tr className="border-b border-[#e8ecee]">
+          <tr className="border-b border-white/[0.08]">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="px-4 py-3 text-left text-xs font-semibold text-[#6d6e6f] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-xs font-semibold text-[#A0A8C8] uppercase tracking-wider"
                 style={col.width ? { width: col.width } : undefined}
               >
                 {col.header}
@@ -48,7 +48,7 @@ export function Table<T>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-8 text-center text-sm text-[#9ca0a4]"
+                className="px-4 py-8 text-center text-sm text-[#6B7394]"
               >
                 {emptyMessage}
               </td>
@@ -59,12 +59,12 @@ export function Table<T>({
                 key={keyExtractor(item)}
                 onClick={() => onRowClick?.(item)}
                 className={cn(
-                  'border-b border-[#edeef0] transition-colors',
-                  onRowClick && 'cursor-pointer hover:bg-[#f6f8f9]'
+                  'border-b border-white/[0.05] transition-colors',
+                  onRowClick && 'cursor-pointer hover:bg-white/[0.04]'
                 )}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className="px-4 py-3 text-sm text-[#1e1f21]">
+                  <td key={col.key} className="px-4 py-3 text-sm text-white">
                     {col.render
                       ? col.render(item)
                       : String((item as Record<string, unknown>)[col.key] ?? '')}

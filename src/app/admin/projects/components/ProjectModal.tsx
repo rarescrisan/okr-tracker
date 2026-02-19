@@ -108,20 +108,20 @@ export function ProjectModal({
 
         {/* DRI Selector */}
         <div>
-          <label className="block text-sm font-medium text-[#1e1f21] mb-2">DRI (Directly Responsible Individual)</label>
+          <label className="block text-sm font-medium text-[#A0A8C8] mb-2">DRI (Directly Responsible Individual)</label>
           {form.dri_user_id && (
             <div className="flex flex-wrap gap-2 mb-3">
               {(() => {
                 const user = users.find(u => u.id.toString() === form.dri_user_id);
                 if (!user) return null;
                 return (
-                  <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#4573d2] text-white text-sm">
+                  <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00C8FF]/[0.15] text-[#00C8FF] border border-[#00C8FF]/[0.3] text-sm">
                     <Avatar name={user.name} size="xs" />
                     {user.name}
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, dri_user_id: '' })}
-                      className="ml-1 hover:bg-[#3562c1] rounded-full p-0.5"
+                      className="ml-1 hover:bg-[#00C8FF]/[0.25] rounded-full p-0.5"
                     >
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -139,7 +139,7 @@ export function ProjectModal({
               onChange={(e) => setDriSearch(e.target.value)}
             />
             {driSearch && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-[#e8ecee] rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-[#2A3152] border border-white/[0.08] rounded-lg shadow-lg max-h-48 overflow-y-auto">
                 {users
                   .filter(u =>
                     u.name.toLowerCase().includes(driSearch.toLowerCase()) &&
@@ -153,18 +153,18 @@ export function ProjectModal({
                         setForm({ ...form, dri_user_id: user.id.toString() });
                         setDriSearch('');
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[#f6f8f9] text-sm"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.06] text-sm"
                     >
                       <Avatar name={user.name} size="xs" />
-                      <span className="text-[#1e1f21]">{user.name}</span>
-                      {user.email && <span className="text-[#9ca0a4]">{user.email}</span>}
+                      <span className="text-white">{user.name}</span>
+                      {user.email && <span className="text-[#6B7394]">{user.email}</span>}
                     </button>
                   ))}
                 {users.filter(u =>
                   u.name.toLowerCase().includes(driSearch.toLowerCase()) &&
                   u.id.toString() !== form.dri_user_id
                 ).length === 0 && (
-                  <div className="px-3 py-2 text-sm text-[#9ca0a4]">No users found</div>
+                  <div className="px-3 py-2 text-sm text-[#6B7394]">No users found</div>
                 )}
               </div>
             )}
@@ -173,7 +173,7 @@ export function ProjectModal({
 
         {/* Working Group Selector */}
         <div>
-          <label className="block text-sm font-medium text-[#1e1f21] mb-2">Working Group</label>
+          <label className="block text-sm font-medium text-[#A0A8C8] mb-2">Working Group</label>
           {form.working_group_ids.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
               {form.working_group_ids.map((userId) => {
@@ -182,14 +182,14 @@ export function ProjectModal({
                 return (
                   <span
                     key={userId}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#4573d2] text-white text-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00C8FF]/[0.15] text-[#00C8FF] border border-[#00C8FF]/[0.3] text-sm"
                   >
                     <Avatar name={user.name} size="xs" />
                     {user.name}
                     <button
                       type="button"
                       onClick={() => toggleWorkingGroupMember(userId)}
-                      className="ml-1 hover:bg-[#3562c1] rounded-full p-0.5"
+                      className="ml-1 hover:bg-[#00C8FF]/[0.25] rounded-full p-0.5"
                     >
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -207,7 +207,7 @@ export function ProjectModal({
               onChange={(e) => setWorkingGroupSearch(e.target.value)}
             />
             {workingGroupSearch && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-[#e8ecee] rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-[#2A3152] border border-white/[0.08] rounded-lg shadow-lg max-h-48 overflow-y-auto">
                 {users
                   .filter(u =>
                     u.name.toLowerCase().includes(workingGroupSearch.toLowerCase()) &&
@@ -221,18 +221,18 @@ export function ProjectModal({
                         toggleWorkingGroupMember(user.id);
                         setWorkingGroupSearch('');
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[#f6f8f9] text-sm"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.06] text-sm"
                     >
                       <Avatar name={user.name} size="xs" />
-                      <span className="text-[#1e1f21]">{user.name}</span>
-                      {user.email && <span className="text-[#9ca0a4]">{user.email}</span>}
+                      <span className="text-white">{user.name}</span>
+                      {user.email && <span className="text-[#6B7394]">{user.email}</span>}
                     </button>
                   ))}
                 {users.filter(u =>
                   u.name.toLowerCase().includes(workingGroupSearch.toLowerCase()) &&
                   !form.working_group_ids.includes(u.id)
                 ).length === 0 && (
-                  <div className="px-3 py-2 text-sm text-[#9ca0a4]">No users found</div>
+                  <div className="px-3 py-2 text-sm text-[#6B7394]">No users found</div>
                 )}
               </div>
             )}

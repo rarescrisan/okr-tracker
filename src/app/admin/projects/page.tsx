@@ -308,10 +308,10 @@ export default function ProjectsPage() {
       />
 
       {loading ? (
-        <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">Loading...</div></Card>
       ) : projects.length === 0 ? (
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">
+          <div className="p-8 text-center text-[#A0A8C8]">
             No projects found. Create your first project to get started.
           </div>
         </Card>
@@ -326,8 +326,8 @@ export default function ProjectsPage() {
               <div key={dept.id}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: dept.color }} />
-                  <h2 className="text-lg font-semibold text-[#1e1f21]">{dept.name}</h2>
-                  <span className="text-sm text-[#6d6e6f]">({deptProjects.length} projects)</span>
+                  <h2 className="text-lg font-semibold text-white">{dept.name}</h2>
+                  <span className="text-sm text-[#A0A8C8]">({deptProjects.length} projects)</span>
                 </div>
                 <div className="space-y-3">
                   {deptProjects.map((project) => (
@@ -353,9 +353,9 @@ export default function ProjectsPage() {
           {projects.filter(p => !p.department_id).length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 rounded-full bg-[#9ca0a4]" />
-                <h2 className="text-lg font-semibold text-[#1e1f21]">Unassigned</h2>
-                <span className="text-sm text-[#6d6e6f]">
+                <div className="w-3 h-3 rounded-full bg-[#6B7394]" />
+                <h2 className="text-lg font-semibold text-white">Unassigned</h2>
+                <span className="text-sm text-[#A0A8C8]">
                   ({projects.filter(p => !p.department_id).length} projects)
                 </span>
               </div>

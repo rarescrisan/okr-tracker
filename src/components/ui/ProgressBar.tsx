@@ -18,10 +18,10 @@ const sizeClasses = {
 
 function getProgressColor(value: number, customColor?: string): string {
   if (customColor) return customColor;
-  if (value >= 100) return '#5da283';
-  if (value >= 70) return '#4573d2';
-  if (value >= 40) return '#f1bd6c';
-  return '#f06a6a';
+  if (value >= 100) return '#2DD4A8';
+  if (value >= 70) return '#00C8FF';
+  if (value >= 40) return '#FFB020';
+  return '#FF4D6A';
 }
 
 const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
@@ -31,7 +31,7 @@ const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
 
     return (
       <div ref={ref} className={cn('flex items-center gap-2', className)} {...props}>
-        <div className={cn('flex-1 bg-[#e8ecee] rounded-full overflow-hidden', sizeClasses[size])}>
+        <div className={cn('flex-1 bg-white/[0.10] rounded-full overflow-hidden', sizeClasses[size])}>
           <div
             className="h-full rounded-full transition-all duration-300"
             style={{
@@ -41,7 +41,7 @@ const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
           />
         </div>
         {showLabel && (
-          <span className="text-xs font-medium text-[#6d6e6f] min-w-[3rem] text-right">
+          <span className="text-xs font-medium text-[#A0A8C8] min-w-[3rem] text-right">
             {Math.round(clampedValue)}%
           </span>
         )}

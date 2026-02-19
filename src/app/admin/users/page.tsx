@@ -82,7 +82,7 @@ export default function UsersPage() {
     {
       key: 'email',
       header: 'Email',
-      render: (user: User) => <span className="text-[#6d6e6f]">{user.email || '-'}</span>,
+      render: (user: User) => <span className="text-[#A0A8C8]">{user.email || '-'}</span>,
     },
     {
       key: 'actions',
@@ -107,7 +107,7 @@ export default function UsersPage() {
 
       <Card padding="none">
         {loading ? (
-          <div className="p-8 text-center text-[#6d6e6f]">Loading...</div>
+          <div className="p-8 text-center text-[#A0A8C8]">Loading...</div>
         ) : (
           <Table
             columns={columns}

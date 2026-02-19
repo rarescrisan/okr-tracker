@@ -10,12 +10,12 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantClasses = {
-  default: 'bg-[#e8ecee] text-[#6d6e6f]',
-  success: 'bg-[#e8f5e9] text-[#5da283]',
-  warning: 'bg-[#fff8e1] text-[#f1bd6c]',
-  danger: 'bg-[#ffebee] text-[#f06a6a]',
-  info: 'bg-[#e3f2fd] text-[#4573d2]',
-  outline: 'bg-transparent border border-[#d0d4d9] text-[#6d6e6f]',
+  default: 'bg-white/[0.08] text-[#A0A8C8]',
+  success: 'bg-[#2DD4A8]/[0.15] text-[#2DD4A8]',
+  warning: 'bg-[#FFB020]/[0.15] text-[#FFB020]',
+  danger: 'bg-[#FF4D6A]/[0.15] text-[#FF4D6A]',
+  info: 'bg-[#00C8FF]/[0.12] text-[#00C8FF]',
+  outline: 'bg-transparent border border-white/[0.15] text-[#A0A8C8]',
 };
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(

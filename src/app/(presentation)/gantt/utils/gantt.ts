@@ -80,9 +80,9 @@ export function getPriorityColor(priority: string): string {
 
 export function getStatusColor(status: string): string {
   switch (status) {
-    case 'completed': return '#5da283';
-    case 'in_progress': return '#4573d2';
-    case 'blocked': return '#f06a6a';
-    default: return '#9ca0a4';
+    case 'completed': return '#2DD4A8';
+    case 'in_progress': return '#00C8FF';
+    case 'blocked': return '#FF4D6A';
+    default: return '#6B7394';
   }
 }

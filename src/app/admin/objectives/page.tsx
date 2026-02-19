@@ -208,11 +208,11 @@ export default function ObjectivesPage() {
       </div>
 
       {loading ? (
-        <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">Loading...</div></Card>
       ) : departments.length === 0 ? (
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">
-            No departments found. <a href="/admin/departments" className="text-[#4573d2]">Create a department</a> first.
+          <div className="p-8 text-center text-[#A0A8C8]">
+            No departments found. <a href="/admin/departments" className="text-[#00C8FF]">Create a department</a> first.
           </div>
         </Card>
       ) : (
@@ -223,11 +223,11 @@ export default function ObjectivesPage() {
             return (
               <Card key={deptId} padding="none">
                 <div
-                  className="flex items-center justify-between px-4 py-3 border-b border-[#e8ecee]"
+                  className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]"
                   style={{ borderLeftWidth: 4, borderLeftColor: dept.color }}
                 >
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-[#1e1f21]">{dept.name}</h3>
+                    <h3 className="font-semibold text-white">{dept.name}</h3>
                     <Badge>{deptObjectives.length} objectives</Badge>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => openObjModal(undefined, dept.id)}>
@@ -235,16 +235,16 @@ export default function ObjectivesPage() {
                   </Button>
                 </div>
 
-                <div className="divide-y divide-[#edeef0]">
+                <div className="divide-y divide-white/[0.05]">
                   {deptObjectives.map((obj) => (
                     <div key={obj.id}>
                       <div
-                        className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#f6f8f9]"
+                        className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/[0.04]"
                         onClick={() => toggleExpand(obj.id)}
                       >
                         <div className="flex items-center gap-3">
                           <svg
-                            className={`w-4 h-4 text-[#6d6e6f] transition-transform ${expandedObjs.has(obj.id) ? 'rotate-90' : ''}`}
+                            className={`w-4 h-4 text-[#A0A8C8] transition-transform ${expandedObjs.has(obj.id) ? 'rotate-90' : ''}`}
                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -255,19 +255,19 @@ export default function ObjectivesPage() {
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => openKrModal(obj.id)}
-                            className="px-3 py-1 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+                            className="px-3 py-1 text-xs font-medium text-[#00C8FF] bg-[#00C8FF]/[0.12] hover:bg-[#00C8FF]/[0.20] rounded-full transition-colors"
                           >
                             + KR
                           </button>
                           <button
                             onClick={() => openObjModal(obj)}
-                            className="px-3 py-1 text-xs font-medium text-[#6d6e6f] bg-[#f1f3f4] hover:bg-[#e8ecee] rounded-full transition-colors"
+                            className="px-3 py-1 text-xs font-medium text-[#A0A8C8] bg-white/[0.08] hover:bg-white/[0.12] rounded-full transition-colors"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleObjDelete(obj)}
-                            className="px-3 py-1 text-xs font-medium text-[#d93025] bg-[#fce8e6] hover:bg-[#f8d7da] rounded-full transition-colors"
+                            className="px-3 py-1 text-xs font-medium text-[#FF4D6A] bg-[#FF4D6A]/[0.12] hover:bg-[#FF4D6A]/[0.20] rounded-full transition-colors"
                           >
                             Delete
                           </button>
@@ -275,10 +275,10 @@ export default function ObjectivesPage() {
                       </div>
 
                       {expandedObjs.has(obj.id) && obj.key_results && obj.key_results.length > 0 && (
-                        <div className="bg-[#f6f8f9] px-4 py-2">
+                        <div className="bg-white/[0.02] px-4 py-2">
                           <table className="w-full text-sm">
                             <thead>
-                              <tr className="text-[#6d6e6f] text-xs uppercase">
+                              <tr className="text-[#A0A8C8] text-xs uppercase">
                                 <th className="text-left py-2 font-medium">Key Result</th>
                                 <th className="text-right py-2 font-medium w-32 px-3">Baseline</th>
                                 <th className="text-right py-2 font-medium w-32 px-3">Target</th>
@@ -291,13 +291,13 @@ export default function ObjectivesPage() {
                               {obj.key_results.map((kr) => {
                                 const progress = calculateProgress(kr.current_value, kr.target_value, kr.baseline_value, kr.direction || 'increase');
                                 return (
-                                  <tr key={kr.id} className={`border-t border-[#e8ecee] ${kr.is_top_kr ? 'bg-[#fff8e1]' : ''}`}>
+                                  <tr key={kr.id} className={`border-t border-white/[0.05] ${kr.is_top_kr ? 'bg-[#FFB020]/[0.06]' : ''}`}>
                                     <td className="py-2">
                                       <Badge color={dept.color} className="mr-2">{kr.code}</Badge>
                                       {kr.title}
                                       {kr.is_top_kr && <Badge variant="warning" className="ml-2">Top KR</Badge>}
                                     </td>
-                                    <td className="text-right py-2 px-3 text-[#6d6e6f]">
+                                    <td className="text-right py-2 px-3 text-[#A0A8C8]">
                                       {formatValue(kr.baseline_value, kr.unit_type, kr.baseline_label)}
                                     </td>
                                     <td className="text-right py-2 px-3">

@@ -107,7 +107,7 @@ export default function DiscussionsPage() {
     return (
       <div>
         <PageHeader title="Discussions" description="Announcements and cross-team requests" />
-        <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">Loading...</div></Card>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function DiscussionsPage() {
     return (
       <div>
         <PageHeader title="Discussions" description="Announcements and cross-team requests" />
-        <Card><div className="p-8 text-center text-[#6d6e6f]">{error}</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">{error}</div></Card>
       </div>
     );
   }
@@ -124,7 +124,7 @@ export default function DiscussionsPage() {
   const announcementActions = (
     <button
       onClick={() => setShowAnnouncementForm(true)}
-      className="h-9 px-4 text-sm font-medium bg-[#4573d2] text-white rounded-md hover:bg-[#3a62b3] transition-colors"
+      className="h-9 px-4 text-sm font-medium bg-[#00C8FF] text-[#0F1326] rounded-md hover:bg-[#00A8D4] transition-colors"
     >
       + New Announcement
     </button>
@@ -135,7 +135,7 @@ export default function DiscussionsPage() {
       <select
         value={requestFilterStatus}
         onChange={e => setRequestFilterStatus(e.target.value)}
-        className="h-9 px-3 text-sm rounded-md border border-[#e8ecee] bg-white text-[#1e1f21] focus:outline-none focus:ring-2 focus:ring-[#4573d2]"
+        className="h-9 px-3 text-sm rounded-md border border-white/[0.12] bg-[#1A1F36] text-white focus:outline-none focus:ring-2 focus:ring-[#00C8FF]"
       >
         <option value="">All statuses</option>
         {X_REQUEST_STATUS_OPTIONS.map(o => (
@@ -144,7 +144,7 @@ export default function DiscussionsPage() {
       </select>
       <button
         onClick={() => setShowRequestForm(true)}
-        className="h-9 px-4 text-sm font-medium bg-[#4573d2] text-white rounded-md hover:bg-[#3a62b3] transition-colors"
+        className="h-9 px-4 text-sm font-medium bg-[#2A3152] text-[#00C8FF] border border-[#00C8FF]/[0.4] rounded-md hover:bg-[#00C8FF]/[0.12] transition-colors"
       >
         + New Request
       </button>
@@ -170,7 +170,7 @@ export default function DiscussionsPage() {
       {activeTab === 'announcements' && (
         announcements.length === 0 ? (
           <Card>
-            <div className="p-8 text-center text-[#6d6e6f]">
+            <div className="p-8 text-center text-[#A0A8C8]">
               No announcements yet. Post one to get started.
             </div>
           </Card>
@@ -187,7 +187,7 @@ export default function DiscussionsPage() {
       {activeTab === 'requests' && (
         filteredRequests.length === 0 ? (
           <Card>
-            <div className="p-8 text-center text-[#6d6e6f]">
+            <div className="p-8 text-center text-[#A0A8C8]">
               {requestFilterStatus ? 'No requests match this filter.' : 'No requests yet. Submit one to get started.'}
             </div>
           </Card>

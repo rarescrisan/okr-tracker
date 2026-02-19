@@ -44,7 +44,7 @@ interface ProjectRowProps {
 function ProjectRowDesktop({ project, isExpanded, onToggleExpand }: ProjectRowProps) {
   return (
     <div
-      className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-3 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
+      className="hidden md:flex items-center gap-4 lg:gap-6 px-4 py-3 cursor-pointer hover:bg-white/[0.04] transition-colors"
       onClick={() => onToggleExpand(project.id)}
     >
       <ExpandIcon isExpanded={isExpanded} />
@@ -55,7 +55,7 @@ function ProjectRowDesktop({ project, isExpanded, onToggleExpand }: ProjectRowPr
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className="font-medium text-[#1e1f21] truncate">{project.name}</h3>
+          <h3 className="font-medium text-white truncate">{project.name}</h3>
           {project.objective_code && (
             <Badge variant="outline" className="flex-shrink-0">
               {project.objective_code}
@@ -66,7 +66,7 @@ function ProjectRowDesktop({ project, isExpanded, onToggleExpand }: ProjectRowPr
           )}
         </div>
         {project.description && (
-          <p className="text-sm text-[#6d6e6f] truncate">{project.description}</p>
+          <p className="text-sm text-[#A0A8C8] truncate">{project.description}</p>
         )}
       </div>
 
@@ -77,7 +77,7 @@ function ProjectRowDesktop({ project, isExpanded, onToggleExpand }: ProjectRowPr
         <ProgressBar value={project.progress_percentage} showLabel size="md" />
       </div>
 
-      <div className="hidden xl:block text-sm text-[#6d6e6f] w-44 flex-shrink-0 text-center whitespace-nowrap">
+      <div className="hidden xl:block text-sm text-[#A0A8C8] w-44 flex-shrink-0 text-center whitespace-nowrap">
         {formatDisplayDate(project.start_date)} - {formatDisplayDate(project.end_date)}
       </div>
 
@@ -91,7 +91,7 @@ function ProjectRowDesktop({ project, isExpanded, onToggleExpand }: ProjectRowPr
 function ProjectRowMobile({ project, isExpanded, onToggleExpand }: ProjectRowProps) {
   return (
     <div
-      className="md:hidden p-4 cursor-pointer hover:bg-[#f6f8f9] transition-colors"
+      className="md:hidden p-4 cursor-pointer hover:bg-white/[0.04] transition-colors"
       onClick={() => onToggleExpand(project.id)}
     >
       <div className="flex items-start gap-3">
@@ -112,9 +112,9 @@ function ProjectRowMobile({ project, isExpanded, onToggleExpand }: ProjectRowPro
             )}
           </div>
 
-          <h3 className="font-medium text-[#1e1f21] mb-1">{project.name}</h3>
+          <h3 className="font-medium text-white mb-1">{project.name}</h3>
           {project.description && (
-            <p className="text-sm text-[#6d6e6f] line-clamp-2 mb-2">{project.description}</p>
+            <p className="text-sm text-[#A0A8C8] line-clamp-2 mb-2">{project.description}</p>
           )}
 
           <div className="flex items-center justify-between gap-4">
@@ -125,7 +125,7 @@ function ProjectRowMobile({ project, isExpanded, onToggleExpand }: ProjectRowPro
           </div>
 
           {(project.start_date || project.end_date) && (
-            <div className="text-xs text-[#9ca0a4] mt-2">
+            <div className="text-xs text-[#6B7394] mt-2">
               {formatDisplayDate(project.start_date)} - {formatDisplayDate(project.end_date)}
             </div>
           )}
@@ -135,7 +135,7 @@ function ProjectRowMobile({ project, isExpanded, onToggleExpand }: ProjectRowPro
               href={project.document_link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block mt-2 px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors"
+              className="inline-block mt-2 px-2 py-0.5 text-xs font-medium text-[#00C8FF] bg-[#00C8FF]/[0.12] hover:bg-[#00C8FF]/[0.20] rounded-full transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               View 1-pager
@@ -155,7 +155,7 @@ interface ExpandIconProps {
 function ExpandIcon({ isExpanded, className = '' }: ExpandIconProps) {
   return (
     <svg
-      className={`w-4 h-4 text-[#6d6e6f] transition-transform flex-shrink-0 ${
+      className={`w-4 h-4 text-[#A0A8C8] transition-transform flex-shrink-0 ${
         isExpanded ? 'rotate-90' : ''
       } ${className}`}
       fill="none"
@@ -177,7 +177,7 @@ function DocumentLink({ href }: DocumentLinkProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="px-2 py-0.5 text-xs font-medium text-[#4573d2] bg-[#e8f0fe] hover:bg-[#d2e3fc] rounded-full transition-colors flex-shrink-0"
+      className="px-2 py-0.5 text-xs font-medium text-[#00C8FF] bg-[#00C8FF]/[0.12] hover:bg-[#00C8FF]/[0.20] rounded-full transition-colors flex-shrink-0"
       title="View Document"
       onClick={(e) => e.stopPropagation()}
     >
@@ -198,12 +198,12 @@ function DRIInfo({ dri, className = '', size = 'sm' }: DRIInfoProps) {
       {dri ? (
         <>
           <Avatar name={dri.name} size={size} />
-          <span className={`text-${size === 'xs' ? 'xs' : 'sm'} text-[#6d6e6f] truncate`}>
+          <span className={`text-${size === 'xs' ? 'xs' : 'sm'} text-[#A0A8C8] truncate`}>
             {dri.name}
           </span>
         </>
       ) : (
-        <span className={`text-${size === 'xs' ? 'xs' : 'sm'} text-[#9ca0a4]`}>Unassigned</span>
+        <span className={`text-${size === 'xs' ? 'xs' : 'sm'} text-[#6B7394]`}>Unassigned</span>
       )}
     </div>
   );
@@ -223,7 +223,7 @@ function WorkingGroup({ users, className = '' }: WorkingGroupProps) {
         <Avatar key={user.id} name={user.name} size="sm" />
       ))}
       {users.length > 3 && (
-        <div className="w-8 h-8 rounded-full bg-[#e8ecee] flex items-center justify-center text-xs text-[#6d6e6f] border-2 border-white">
+        <div className="w-8 h-8 rounded-full bg-white/[0.10] flex items-center justify-center text-xs text-[#A0A8C8] border-2 border-[#212840]">
           +{users.length - 3}
         </div>
       )}
@@ -238,15 +238,15 @@ interface TasksListProps {
 
 function TasksList({ tasks, onTaskToggle }: TasksListProps) {
   return (
-    <div className="border-t border-[#e8ecee] bg-[#f6f8f9]">
+    <div className="border-t border-white/[0.08] bg-white/[0.02]">
       {tasks && tasks.length > 0 ? (
-        <div className="divide-y divide-[#edeef0]">
+        <div className="divide-y divide-white/[0.05]">
           {tasks.map((task) => (
             <TaskRow key={task.id} task={task} onToggle={onTaskToggle} />
           ))}
         </div>
       ) : (
-        <div className="px-4 py-4 pl-8 md:pl-12 text-sm text-[#9ca0a4]">
+        <div className="px-4 py-4 pl-8 md:pl-12 text-sm text-[#6B7394]">
           No tasks for this project.
         </div>
       )}

@@ -36,7 +36,7 @@ export default function OKRDashboard() {
     return (
       <div>
         <PageHeader title="OKR Dashboard" description="Track objectives and key results" />
-        <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">Loading...</div></Card>
       </div>
     );
   }
@@ -47,8 +47,8 @@ export default function OKRDashboard() {
 
       {departments.length === 0 ? (
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">
-            No OKRs found. <a href="/admin/objectives" className="text-[#4573d2]">Create objectives</a> to get started.
+          <div className="p-8 text-center text-[#A0A8C8]">
+            No OKRs found. <a href="/admin/objectives" className="text-[#00C8FF]">Create objectives</a> to get started.
           </div>
         </Card>
       ) : (

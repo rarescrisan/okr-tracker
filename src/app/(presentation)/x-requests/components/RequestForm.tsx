@@ -49,13 +49,13 @@ function Autocomplete({ options, value, onChange, placeholder, disabled }: Autoc
 
   if (selected) {
     return (
-      <div className={`flex items-center h-10 px-3 border border-[#e8ecee] rounded-md bg-white gap-2 ${disabled ? 'opacity-50' : ''}`}>
-        <span className="flex-1 text-sm text-[#1e1f21] truncate">{selected.label}</span>
+      <div className={`flex items-center h-10 px-3 border border-white/[0.12] rounded-md bg-[#1A1F36] gap-2 ${disabled ? 'opacity-50' : ''}`}>
+        <span className="flex-1 text-sm text-white truncate">{selected.label}</span>
         {!disabled && (
           <button
             type="button"
             onClick={() => onChange('')}
-            className="shrink-0 text-[#9ca0a4] hover:text-[#1e1f21] transition-colors"
+            className="shrink-0 text-[#6B7394] hover:text-white transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -75,16 +75,16 @@ function Autocomplete({ options, value, onChange, placeholder, disabled }: Autoc
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full h-10 px-3 text-sm border border-[#e8ecee] rounded-md bg-white text-[#1e1f21] placeholder-[#9ca0a4] focus:outline-none focus:ring-2 focus:ring-[#4573d2] focus:border-transparent disabled:bg-[#f6f8f9] disabled:cursor-not-allowed"
+        className="w-full h-10 px-3 text-sm border border-white/[0.12] rounded-md bg-[#1A1F36] text-white placeholder-[#6B7394] focus:outline-none focus:ring-2 focus:ring-[#00C8FF] focus:border-transparent disabled:bg-[#2A3152] disabled:cursor-not-allowed"
       />
       {open && filtered.length > 0 && (
-        <div className="absolute z-30 top-full mt-1 w-full bg-white border border-[#e8ecee] rounded-md shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-30 top-full mt-1 w-full bg-[#2A3152] border border-white/[0.08] rounded-md shadow-lg max-h-48 overflow-y-auto">
           {filtered.map(o => (
             <button
               key={o.value}
               type="button"
               onMouseDown={() => { onChange(o.value); setQuery(''); setOpen(false); }}
-              className="w-full text-left px-3 py-2 text-sm text-[#1e1f21] hover:bg-[#f6f8f9]"
+              className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/[0.06]"
             >
               {o.label}
             </button>
@@ -92,7 +92,7 @@ function Autocomplete({ options, value, onChange, placeholder, disabled }: Autoc
         </div>
       )}
       {open && query.length > 0 && filtered.length === 0 && (
-        <div className="absolute z-30 top-full mt-1 w-full bg-white border border-[#e8ecee] rounded-md shadow-lg px-3 py-2 text-sm text-[#9ca0a4]">
+        <div className="absolute z-30 top-full mt-1 w-full bg-[#2A3152] border border-white/[0.08] rounded-md shadow-lg px-3 py-2 text-sm text-[#6B7394]">
           No results
         </div>
       )}
@@ -165,11 +165,11 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* From */}
       <div>
-        <h3 className="text-sm font-semibold text-[#1e1f21] mb-3">From</h3>
+        <h3 className="text-sm font-semibold text-white mb-3">From</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-              Department <span className="text-[#f06a6a]">*</span>
+            <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+              Department <span className="text-[#FF4D6A]">*</span>
             </label>
             <Autocomplete
               options={deptOptions}
@@ -183,8 +183,8 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-              Person <span className="text-[#f06a6a]">*</span>
+            <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+              Person <span className="text-[#FF4D6A]">*</span>
             </label>
             <Autocomplete
               options={userOptions}
@@ -194,7 +194,7 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
+            <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
               Project (optional)
             </label>
             <Autocomplete
@@ -209,7 +209,7 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
           </div>
           {requestingProjectId && (
             <div>
-              <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
+              <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
                 Task (optional)
               </label>
               <Select
@@ -222,15 +222,15 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
         </div>
       </div>
 
-      <div className="border-t border-[#edeef0]" />
+      <div className="border-t border-white/[0.08]" />
 
       {/* To */}
       <div>
-        <h3 className="text-sm font-semibold text-[#1e1f21] mb-3">To</h3>
+        <h3 className="text-sm font-semibold text-white mb-3">To</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-              Department <span className="text-[#f06a6a]">*</span>
+            <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+              Department <span className="text-[#FF4D6A]">*</span>
             </label>
             <Autocomplete
               options={deptOptions}
@@ -243,7 +243,7 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
+            <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
               Person (optional)
             </label>
             <Autocomplete
@@ -256,12 +256,12 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
         </div>
       </div>
 
-      <div className="border-t border-[#edeef0]" />
+      <div className="border-t border-white/[0.08]" />
 
       {/* Description */}
       <div>
-        <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-          What do you need? <span className="text-[#f06a6a]">*</span>
+        <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+          What do you need? <span className="text-[#FF4D6A]">*</span>
         </label>
         <Textarea
           value={description}
@@ -271,7 +271,7 @@ export function RequestForm({ departments, users, projects, onSubmit, onCancel }
         />
       </div>
 
-      {error && <p className="text-sm text-[#f06a6a]">{error}</p>}
+      {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
 
       <div className="flex items-center justify-end gap-3">
         <Button variant="secondary" type="button" onClick={onCancel} disabled={submitting}>

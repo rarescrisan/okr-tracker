@@ -49,7 +49,7 @@ export default function GanttChart() {
     return (
       <div>
         <PageHeader title="Timeline" description="Gantt chart view of projects and tasks" />
-        <Card><div className="p-8 text-center text-[#6d6e6f]">Loading...</div></Card>
+        <Card><div className="p-8 text-center text-[#A0A8C8]">Loading...</div></Card>
       </div>
     );
   }
@@ -74,8 +74,8 @@ export default function GanttChart() {
 
       {projects.length === 0 ? (
         <Card>
-          <div className="p-8 text-center text-[#6d6e6f]">
-            No projects found. <a href="/admin/projects" className="text-[#4573d2]">Create a project</a> to get started.
+          <div className="p-8 text-center text-[#A0A8C8]">
+            No projects found. <a href="/admin/projects" className="text-[#00C8FF]">Create a project</a> to get started.
           </div>
         </Card>
       ) : (
@@ -94,12 +94,12 @@ export default function GanttChart() {
           />
 
           {/* Legend */}
-          <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-[#6d6e6f]">
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#f06a6a]" /><span>P0</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#f1bd6c]" /><span>P1</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#4573d2]" /><span>P2 / In Progress</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#5da283]" /><span>Completed</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#9ca0a4]" /><span>Not Started</span></div>
+          <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-[#A0A8C8]">
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#FF4D6A]" /><span>P0</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#FFB020]" /><span>P1</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#00C8FF]" /><span>P2 / In Progress</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#2DD4A8]" /><span>Completed</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-[#6B7394]" /><span>Not Started</span></div>
           </div>
         </>
       )}

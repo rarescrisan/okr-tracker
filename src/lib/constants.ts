@@ -24,19 +24,19 @@ export const COLORS = {
 
   // Status colors
   status: {
-    notStarted: '#9ca0a4',
-    inProgress: '#4573d2',
-    blocked: '#f06a6a',
-    completed: '#5da283',
-    onHold: '#f1bd6c',
+    notStarted: '#6B7394',
+    inProgress: '#00C8FF',
+    blocked: '#FF4D6A',
+    completed: '#2DD4A8',
+    onHold: '#FFB020',
   },
 
   // Priority colors
   priority: {
-    P0: '#f06a6a',
-    P1: '#f1bd6c',
-    P2: '#4573d2',
-    P3: '#9ca0a4',
+    P0: '#FF4D6A',
+    P1: '#FFB020',
+    P2: '#00C8FF',
+    P3: '#6B7394',
   },
 
   // Department colors (for department sections)

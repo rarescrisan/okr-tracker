@@ -42,26 +42,26 @@ export function AnnouncementForm({ departments, onSubmit, onCancel }: Announceme
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-          Your name <span className="text-[#f06a6a]">*</span>
+        <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+          Your name <span className="text-[#FF4D6A]">*</span>
         </label>
         <input
           type="text"
           value={authorName}
           onChange={e => setAuthorName(e.target.value)}
           placeholder="e.g. Alex Johnson"
-          className="w-full h-10 px-3 text-sm border border-[#e8ecee] rounded-md bg-white text-[#1e1f21] placeholder-[#9ca0a4] focus:outline-none focus:ring-2 focus:ring-[#4573d2] focus:border-transparent"
+          className="w-full h-10 px-3 text-sm border border-white/[0.12] rounded-md bg-[#1A1F36] text-white placeholder-[#6B7394] focus:outline-none focus:ring-2 focus:ring-[#00C8FF] focus:border-transparent"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-          Department <span className="text-[#f06a6a]">*</span>
+        <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+          Department <span className="text-[#FF4D6A]">*</span>
         </label>
         <select
           value={departmentId}
           onChange={e => setDepartmentId(e.target.value)}
-          className="w-full h-10 px-3 text-sm border border-[#e8ecee] rounded-md bg-white text-[#1e1f21] focus:outline-none focus:ring-2 focus:ring-[#4573d2] focus:border-transparent"
+          className="w-full h-10 px-3 text-sm border border-white/[0.12] rounded-md bg-[#1A1F36] text-white focus:outline-none focus:ring-2 focus:ring-[#00C8FF] focus:border-transparent"
         >
           <option value="">Select a department...</option>
           {departments.map(d => (
@@ -71,8 +71,8 @@ export function AnnouncementForm({ departments, onSubmit, onCancel }: Announceme
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[#6d6e6f] mb-1">
-          Announcement <span className="text-[#f06a6a]">*</span>
+        <label className="block text-xs font-medium text-[#A0A8C8] mb-1">
+          Announcement <span className="text-[#FF4D6A]">*</span>
         </label>
         <Textarea
           value={description}
@@ -82,7 +82,7 @@ export function AnnouncementForm({ departments, onSubmit, onCancel }: Announceme
         />
       </div>
 
-      {error && <p className="text-sm text-[#f06a6a]">{error}</p>}
+      {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
 
       <div className="flex items-center justify-end gap-3">
         <Button variant="secondary" type="button" onClick={onCancel} disabled={submitting}>
