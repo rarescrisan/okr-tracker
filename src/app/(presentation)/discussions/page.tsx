@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, Modal, Tabs } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
-import { XRequest, Department, User, Project, CreateXRequest, Announcement, CreateAnnouncement } from '@/src/types';
+import { XRequest, Department, User, Project, CreateXRequest, Announcement, CreateAnnouncement, TodoItem } from '@/src/types';
 import { X_REQUEST_STATUS_OPTIONS } from '@/src/lib/constants';
 import {
   fetchDiscussionsData,
@@ -12,8 +12,12 @@ import {
   createXRequest,
   updateXRequestStatus,
   deleteXRequest,
+  fetchTodoItems,
+  createTodoItem,
+  toggleTodoItem,
+  deleteTodoItem,
 } from './lib/api';
-import { AnnouncementCard, AnnouncementForm } from './components';
+import { AnnouncementCard, AnnouncementForm, TodoList } from './components';
 import { RequestCard, RequestForm } from '../x-requests/components';
 
 const TABS = [
@@ -29,6 +33,7 @@ export default function DiscussionsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +45,16 @@ export default function DiscussionsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await fetchDiscussionsData();
+        const [data, todos] = await Promise.all([
+          fetchDiscussionsData(),
+          fetchTodoItems(),
+        ]);
         setAnnouncements(data.announcements);
         setRequests(data.requests);
         setDepartments(data.departments);
         setUsers(data.users);
         setProjects(data.projects);
+        setTodoItems(todos);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -96,6 +105,31 @@ export default function DiscussionsPage() {
     } catch {
       const fresh = await fetchDiscussionsData();
       setRequests(fresh.requests);
+    }
+  }
+
+  async function handleTodoAdd(text: string) {
+    const item = await createTodoItem({ text });
+    setTodoItems(prev => [...prev, item]);
+  }
+
+  async function handleTodoToggle(id: number) {
+    setTodoItems(prev => prev.map(i => i.id === id ? { ...i, is_completed: !i.is_completed } : i));
+    try {
+      const updated = await toggleTodoItem(id);
+      setTodoItems(prev => prev.map(i => i.id === id ? updated : i));
+    } catch {
+      setTodoItems(prev => prev.map(i => i.id === id ? { ...i, is_completed: !i.is_completed } : i));
+    }
+  }
+
+  async function handleTodoDelete(id: number) {
+    setTodoItems(prev => prev.filter(i => i.id !== id));
+    try {
+      await deleteTodoItem(id);
+    } catch {
+      const todos = await fetchTodoItems();
+      setTodoItems(todos);
     }
   }
 
@@ -166,21 +200,44 @@ export default function DiscussionsPage() {
         className="mb-6"
       />
 
-      {/* Announcements tab */}
+      {/* Announcements tab — todo list left, announcements right */}
       {activeTab === 'announcements' && (
-        announcements.length === 0 ? (
-          <Card>
-            <div className="p-8 text-center text-[#A0A8C8]">
-              No announcements yet. Post one to get started.
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
+          {/* Left — To-do list */}
+          <Card padding="none">
+            <div className="px-5 pt-4 pb-3 border-b border-white/[0.06]">
+              <h2 className="text-sm font-semibold text-white">To-do list</h2>
+              <p className="text-xs text-[#6B7394] mt-0.5">
+                {todoItems.filter(i => !i.is_completed).length} remaining
+              </p>
+            </div>
+            <div className="p-4">
+              <TodoList
+                items={todoItems}
+                onAdd={handleTodoAdd}
+                onToggle={handleTodoToggle}
+                onDelete={handleTodoDelete}
+              />
             </div>
           </Card>
-        ) : (
-          <div className="space-y-3">
-            {announcements.map(a => (
-              <AnnouncementCard key={a.id} announcement={a} onDelete={handleAnnouncementDelete} />
-            ))}
+
+          {/* Right — Announcements */}
+          <div>
+            {announcements.length === 0 ? (
+              <Card>
+                <div className="p-8 text-center text-[#A0A8C8]">
+                  No announcements yet. Post one to get started.
+                </div>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {announcements.map(a => (
+                  <AnnouncementCard key={a.id} announcement={a} onDelete={handleAnnouncementDelete} />
+                ))}
+              </div>
+            )}
           </div>
-        )
+        </div>
       )}
 
       {/* Requests tab */}

@@ -22,6 +22,18 @@ interface PriorityViewProps {
   onTaskToggle: (taskId: number, currentStatus: string) => void;
 }
 
+function formatShortDate(date: string | null | undefined): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  const month = d.toLocaleString('default', { month: 'short', timeZone: 'UTC' });
+  const day = d.getUTCDate();
+  const suffix = day === 1 || day === 21 || day === 31 ? 'st'
+    : day === 2 || day === 22 ? 'nd'
+    : day === 3 || day === 23 ? 'rd'
+    : 'th';
+  return `${month} ${day}${suffix}`;
+}
+
 function getMonthKey(dateStr: string | null | undefined): string {
   if (!dateStr) return 'no-deadline';
   const d = new Date(dateStr);
@@ -258,15 +270,10 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
               {task.title}
             </span>
             <button onClick={handleProjectClick} className="flex-shrink-0 hover:opacity-75 transition-opacity">
-              <Badge color={task.project_color}>
+              <Badge color={task.department_color ?? task.project_color}>
                 {task.project_name}
               </Badge>
             </button>
-            {task.department_name && task.department_color && (
-              <Badge color={task.department_color} dot className="flex-shrink-0">
-                {task.department_name}
-              </Badge>
-            )}
           </div>
         </div>
 
@@ -286,7 +293,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
         </div>
 
         <div className="hidden xl:block text-sm text-[#A0A8C8] w-44 flex-shrink-0 text-center whitespace-nowrap">
-          {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
+          {formatShortDate(task.start_date)} - {formatShortDate(task.end_date)}
         </div>
 
         <Badge color={getStatusColor(task.status)} className="flex-shrink-0">
@@ -309,15 +316,10 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
                 {getTaskStatusLabel(task.status)}
               </Badge>
               <button onClick={handleProjectClick} className="flex-shrink-0 hover:opacity-75 transition-opacity">
-                <Badge color={task.project_color} className="text-xs">
+                <Badge color={task.department_color ?? task.project_color} className="text-xs">
                   {task.project_name}
                 </Badge>
               </button>
-              {task.department_name && task.department_color && (
-                <Badge color={task.department_color} dot className="text-xs flex-shrink-0">
-                  {task.department_name}
-                </Badge>
-              )}
             </div>
 
             <div className="flex items-center justify-between gap-4">
@@ -336,7 +338,7 @@ function DeadlineTaskRow({ task, onToggle, onProjectClick }: DeadlineTaskRowProp
 
             {(task.start_date || task.end_date) && (
               <div className="text-xs text-[#6B7394] mt-1.5">
-                {formatDisplayDate(task.start_date)} - {formatDisplayDate(task.end_date)}
+                {formatShortDate(task.start_date)} - {formatShortDate(task.end_date)}
               </div>
             )}
           </div>

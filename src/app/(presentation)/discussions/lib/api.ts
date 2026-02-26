@@ -1,4 +1,4 @@
-import { XRequest, Department, User, Project, CreateXRequest, Announcement, CreateAnnouncement } from '@/src/types';
+import { XRequest, Department, User, Project, CreateXRequest, Announcement, CreateAnnouncement, TodoItem, CreateTodoItem } from '@/src/types';
 
 export async function fetchDiscussionsData() {
   try {
@@ -84,4 +84,37 @@ export async function updateXRequestStatus(id: number, status: XRequest['status'
 export async function deleteXRequest(id: number): Promise<void> {
   const response = await fetch(`/api/x-requests/${id}`, { method: 'DELETE' });
   if (!response.ok) throw new Error('Failed to delete request');
+}
+
+export async function fetchTodoItems(): Promise<TodoItem[]> {
+  const response = await fetch('/api/todo-items');
+  if (!response.ok) throw new Error('Failed to fetch todo items');
+  const result = await response.json();
+  return result.data || [];
+}
+
+export async function createTodoItem(data: CreateTodoItem): Promise<TodoItem> {
+  const response = await fetch('/api/todo-items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to create todo item');
+  }
+  const result = await response.json();
+  return result.data;
+}
+
+export async function toggleTodoItem(id: number): Promise<TodoItem> {
+  const response = await fetch(`/api/todo-items/${id}`, { method: 'PATCH' });
+  if (!response.ok) throw new Error('Failed to toggle todo item');
+  const result = await response.json();
+  return result.data;
+}
+
+export async function deleteTodoItem(id: number): Promise<void> {
+  const response = await fetch(`/api/todo-items/${id}`, { method: 'DELETE' });
+  if (!response.ok) throw new Error('Failed to delete todo item');
 }

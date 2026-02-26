@@ -166,3 +166,14 @@ export interface Announcement {
 
 export type CreateAnnouncement = Omit<Announcement, 'id' | 'created_at' | 'updated_at' | 'department'>;
 export type UpdateAnnouncement = Partial<CreateAnnouncement>;
+
+export interface TodoItem {
+  id: number;
+  text: string;
+  is_completed: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CreateTodoItem = Pick<TodoItem, 'text'>;

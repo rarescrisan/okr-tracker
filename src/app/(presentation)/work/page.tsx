@@ -9,6 +9,7 @@ import { toggleTaskStatus } from './utils/helpers';
 import { EmptyState } from './components/EmptyState';
 import { DepartmentSection } from './components/DepartmentSection';
 import { PriorityView } from './components/PriorityView';
+import { ReleasedView } from './components/ReleasedView';
 
 export default function WorkTracker() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -16,7 +17,7 @@ export default function WorkTracker() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedProjects, setExpandedProjects] = useState<Set<number>>(new Set());
-  const [viewMode, setViewMode] = useState<'department' | 'priority'>('department');
+  const [viewMode, setViewMode] = useState<'department' | 'priority' | 'released'>('department');
 
   // Filters (currently not rendered in UI, but kept for future use)
   const [departmentFilter] = useState('all');
@@ -132,6 +133,16 @@ export default function WorkTracker() {
       >
         Deadline
       </button>
+      <button
+        onClick={() => setViewMode('released')}
+        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          viewMode === 'released'
+            ? 'bg-[#2A3152] text-white shadow-sm'
+            : 'text-[#A0A8C8] hover:text-white'
+        }`}
+      >
+        Released
+      </button>
     </div>
   );
 
@@ -141,6 +152,11 @@ export default function WorkTracker() {
 
       {filteredProjects.length === 0 ? (
         <EmptyState hasProjects={projects.length > 0} />
+      ) : viewMode === 'released' ? (
+        <ReleasedView
+          projects={filteredProjects}
+          departments={departments}
+        />
       ) : viewMode === 'priority' ? (
         <PriorityView
           projects={filteredProjects}
