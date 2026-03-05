@@ -1,0 +1,23 @@
+[
+  {
+    "id": "028a5c64-77ac-45a2-b49b-e97ffd3a1515",
+    "pitchbook_id": null,
+    "company_name": "Katalist",
+    "company_domain": "katalist.ai",
+    "location": "San Francisco",
+    "year_founded": "2023",
+    "deal_type": "seed",
+    "last_financing_amount": 1500000.00,
+    "last_financing_date": "2025-12-17",
+    "total_raised": 1500000.00,
+    "createdAt": "2025-12-30 23:13:35.666391",
+    "updatedAt": "2025-12-30 18:15:15.887",
+    "status": "Available",
+    "crunchbase_id": "katalistai",
+    "angellist_id": null,
+    "aviato_id": null,
+    "external_categories": "Artificial Intelligence (AI), Generative AI, Information Technology, Internet",
+    "short_description": "Katalist is an artificial intelligence creative platform that provides tools for converting written scripts into visual storyboards.",
+    "affinity_id": "292524921"
+  }
+]

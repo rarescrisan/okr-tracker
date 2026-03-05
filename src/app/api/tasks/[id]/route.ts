@@ -47,7 +47,8 @@ export async function PUT(
 
     const fields: (keyof UpdateProjectTask)[] = [
       'project_id', 'title', 'description', 'assignee_user_id',
-      'status', 'progress_percentage', 'start_date', 'end_date', 'display_order', 'document_link'
+      'status', 'progress_percentage', 'start_date', 'end_date', 'display_order', 'document_link',
+      'completion_note', 'completion_link'
     ];
 
     for (const field of fields) {

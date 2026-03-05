@@ -90,6 +90,8 @@ export interface ProjectTask {
   end_date?: string | null;
   display_order: number;
   document_link?: string | null;
+  completion_note?: string | null;
+  completion_link?: string | null;
   assignee?: User;
   project?: Project;
   created_at: string;

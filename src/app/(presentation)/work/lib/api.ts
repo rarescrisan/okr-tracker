@@ -32,13 +32,20 @@ export async function fetchWorkData() {
 export async function updateTaskStatus(
   taskId: number,
   status: string,
-  progressPercentage: number
+  progressPercentage: number,
+  completionNote?: string | null,
+  completionLink?: string | null
 ) {
   try {
     const response = await fetch(`/api/tasks/${taskId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, progress_percentage: progressPercentage }),
+      body: JSON.stringify({
+        status,
+        progress_percentage: progressPercentage,
+        completion_note: completionNote ?? null,
+        completion_link: completionLink ?? null,
+      }),
     });
 
     if (!response.ok) {

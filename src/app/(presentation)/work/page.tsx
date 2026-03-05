@@ -10,6 +10,7 @@ import { EmptyState } from './components/EmptyState';
 import { DepartmentSection } from './components/DepartmentSection';
 import { PriorityView } from './components/PriorityView';
 import { ReleasedView } from './components/ReleasedView';
+import { CompletionModal } from './components/CompletionModal';
 
 export default function WorkTracker() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -18,6 +19,7 @@ export default function WorkTracker() {
   const [error, setError] = useState<string | null>(null);
   const [expandedProjects, setExpandedProjects] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<'department' | 'priority' | 'released'>('department');
+  const [pendingCompletion, setPendingCompletion] = useState<{ taskId: number; title: string } | null>(null);
 
   // Filters (currently not rendered in UI, but kept for future use)
   const [departmentFilter] = useState('all');
@@ -52,17 +54,26 @@ export default function WorkTracker() {
     setExpandedProjects(newExpanded);
   };
 
-  const handleTaskToggle = async (taskId: number, currentStatus: string) => {
-    const { status: newStatus, progress: newProgress } = toggleTaskStatus(currentStatus);
-
-    // Optimistic update
+  const applyTaskUpdate = async (
+    taskId: number,
+    newStatus: string,
+    newProgress: number,
+    completionNote?: string,
+    completionLink?: string
+  ) => {
     const updatedProjects = projects.map(project => {
       if (project.tasks) {
         return {
           ...project,
           tasks: project.tasks.map(task =>
             task.id === taskId
-              ? { ...task, status: newStatus as 'not_started' | 'in_progress' | 'blocked' | 'completed', progress_percentage: newProgress }
+              ? {
+                  ...task,
+                  status: newStatus as 'not_started' | 'in_progress' | 'blocked' | 'completed',
+                  progress_percentage: newProgress,
+                  completion_note: completionNote ?? null,
+                  completion_link: completionLink ?? null,
+                }
               : task
           )
         };
@@ -71,14 +82,35 @@ export default function WorkTracker() {
     }) as Project[];
     setProjects(updatedProjects);
 
-    // Update in background
     try {
-      await updateTaskStatus(taskId, newStatus, newProgress);
+      await updateTaskStatus(taskId, newStatus, newProgress, completionNote, completionLink);
     } catch (error) {
-      // Revert on error
       setProjects(projects);
       console.error('Failed to update task:', error);
     }
+  };
+
+  const handleTaskToggle = (taskId: number, currentStatus: string) => {
+    const { status: newStatus, progress: newProgress } = toggleTaskStatus(currentStatus);
+
+    if (newStatus === 'completed') {
+      // Find the task title for the modal
+      let title = 'Task';
+      for (const project of projects) {
+        const task = project.tasks?.find(t => t.id === taskId);
+        if (task) { title = task.title; break; }
+      }
+      setPendingCompletion({ taskId, title });
+    } else {
+      // Uncompleting — clear completion fields immediately
+      applyTaskUpdate(taskId, newStatus, newProgress, '', '');
+    }
+  };
+
+  const handleCompletionConfirm = (completionLink: string, completionNote: string) => {
+    if (!pendingCompletion) return;
+    setPendingCompletion(null);
+    applyTaskUpdate(pendingCompletion.taskId, 'completed', 100, completionNote, completionLink);
   };
 
   const filteredProjects = projects.filter((p) => {
@@ -149,6 +181,14 @@ export default function WorkTracker() {
   return (
     <div>
       <PageHeader title="Work Tracker" description="View all projects and tasks" actions={viewToggle} />
+
+      {pendingCompletion && (
+        <CompletionModal
+          taskTitle={pendingCompletion.title}
+          onConfirm={handleCompletionConfirm}
+          onCancel={() => setPendingCompletion(null)}
+        />
+      )}
 
       {filteredProjects.length === 0 ? (
         <EmptyState hasProjects={projects.length > 0} />
