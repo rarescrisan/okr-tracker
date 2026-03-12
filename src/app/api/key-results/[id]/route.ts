@@ -64,7 +64,8 @@ export async function PUT(
     const fields: (keyof UpdateKeyResult)[] = [
       'objective_id', 'code', 'title', 'description',
       'baseline_value', 'baseline_label', 'target_value', 'target_label',
-      'current_value', 'current_label', 'unit_type', 'direction', 'target_date', 'is_top_kr'
+      'current_value', 'current_label', 'unit_type', 'direction', 'target_date',
+      'estimated_completion_date', 'is_top_kr'
     ];
 
     for (const field of fields) {
@@ -72,7 +73,7 @@ export async function PUT(
         updates.push(`${field} = $${paramIndex++}`);
         // Convert empty strings to null for date fields
         const value = body[field];
-        if (field === 'target_date' && value === '') {
+        if ((field === 'target_date' || field === 'estimated_completion_date') && value === '') {
           values.push(null);
         } else {
           values.push(value as string | number | boolean | null ?? null);

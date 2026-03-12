@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button, Card, Select, Badge, ProgressBar } from '@/src/components/ui';
 import { PageHeader } from '@/src/components/layout';
 import { Department, Objective, KeyResult } from '@/src/types';
-import { calculateProgress, formatValue, formatInputDate } from '@/src/lib/utils';
+import { calculateProgress, formatValue, formatInputDate, formatDisplayDate } from '@/src/lib/utils';
 import { fetchObjectivesPageData, saveObjective, deleteObjective, saveKeyResult, deleteKeyResult } from './lib/api';
 import { ObjectiveModal } from './components/ObjectiveModal';
 import { KeyResultModal } from './components/KeyResultModal';
@@ -21,8 +21,6 @@ interface KrForm {
   code: string;
   title: string;
   description: string;
-  baseline_value: string;
-  baseline_label: string;
   target_value: string;
   target_label: string;
   current_value: string;
@@ -30,14 +28,15 @@ interface KrForm {
   unit_type: 'number' | 'currency' | 'percentage';
   direction: 'increase' | 'decrease';
   target_date: string;
+  estimated_completion_date: string;
   is_top_kr: boolean;
 }
 
 const defaultObjForm: ObjForm = { department_id: '', code: '', title: '', description: '', is_top_objective: false };
 const defaultKrForm: KrForm = {
-  code: '', title: '', description: '', baseline_value: '', baseline_label: '',
+  code: '', title: '', description: '',
   target_value: '', target_label: '', current_value: '0', current_label: '',
-  unit_type: 'number', direction: 'increase', target_date: '', is_top_kr: false,
+  unit_type: 'number', direction: 'increase', target_date: '', estimated_completion_date: '', is_top_kr: false,
 };
 
 export default function ObjectivesPage() {
@@ -140,8 +139,6 @@ export default function ObjectivesPage() {
         code: kr.code,
         title: kr.title,
         description: kr.description || '',
-        baseline_value: kr.baseline_value?.toString() || '',
-        baseline_label: kr.baseline_label || '',
         target_value: kr.target_value.toString(),
         target_label: kr.target_label || '',
         current_value: kr.current_value.toString(),
@@ -149,6 +146,7 @@ export default function ObjectivesPage() {
         unit_type: kr.unit_type,
         direction: kr.direction || 'increase',
         target_date: formatInputDate(kr.target_date),
+        estimated_completion_date: formatInputDate(kr.estimated_completion_date),
         is_top_kr: kr.is_top_kr || false,
       });
     } else {
@@ -280,10 +278,10 @@ export default function ObjectivesPage() {
                             <thead>
                               <tr className="text-[#A0A8C8] text-xs uppercase">
                                 <th className="text-left py-2 font-medium">Key Result</th>
-                                <th className="text-right py-2 font-medium w-32 px-3">Baseline</th>
                                 <th className="text-right py-2 font-medium w-32 px-3">Target</th>
                                 <th className="text-right py-2 font-medium w-32 px-3">Current</th>
                                 <th className="text-center py-2 font-medium w-32 px-3">Progress</th>
+                                <th className="text-right py-2 font-medium w-40 px-3">Est. Completion</th>
                                 <th className="w-24"></th>
                               </tr>
                             </thead>
@@ -297,9 +295,6 @@ export default function ObjectivesPage() {
                                       {kr.title}
                                       {kr.is_top_kr && <Badge variant="warning" className="ml-2">Top KR</Badge>}
                                     </td>
-                                    <td className="text-right py-2 px-3 text-[#A0A8C8]">
-                                      {formatValue(kr.baseline_value, kr.unit_type, kr.baseline_label)}
-                                    </td>
                                     <td className="text-right py-2 px-3">
                                       {formatValue(kr.target_value, kr.unit_type, kr.target_label)}
                                     </td>
@@ -308,6 +303,9 @@ export default function ObjectivesPage() {
                                     </td>
                                     <td className="py-2 px-3">
                                       <ProgressBar value={progress} showLabel size="sm" />
+                                    </td>
+                                    <td className="text-right py-2 px-3 text-[#A0A8C8]">
+                                      {formatDisplayDate(kr.estimated_completion_date)}
                                     </td>
                                     <td className="py-2 text-right">
                                       <div className="flex items-center justify-end gap-1">

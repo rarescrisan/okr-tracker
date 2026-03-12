@@ -47,6 +47,7 @@ export interface KeyResult {
   unit_type: 'number' | 'currency' | 'percentage';
   direction: 'increase' | 'decrease';
   target_date?: string | null;
+  estimated_completion_date?: string | null;
   is_top_kr: boolean;
   objective?: Objective;
   progress_percentage?: number;

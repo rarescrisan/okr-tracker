@@ -8,8 +8,6 @@ interface KrForm {
   code: string;
   title: string;
   description: string;
-  baseline_value: string;
-  baseline_label: string;
   target_value: string;
   target_label: string;
   current_value: string;
@@ -17,6 +15,7 @@ interface KrForm {
   unit_type: 'number' | 'currency' | 'percentage';
   direction: 'increase' | 'decrease';
   target_date: string;
+  estimated_completion_date: string;
   is_top_kr: boolean;
 }
 
@@ -90,22 +89,6 @@ export function KeyResultModal({ isOpen, onClose, editingKr, form, setForm, onSu
         />
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Baseline Value"
-            type="number"
-            step="any"
-            value={form.baseline_value}
-            onChange={(e) => setForm({ ...form, baseline_value: e.target.value })}
-            placeholder="Starting value"
-          />
-          <Input
-            label="Baseline Label"
-            value={form.baseline_label}
-            onChange={(e) => setForm({ ...form, baseline_label: e.target.value })}
-            placeholder="e.g., per month"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Input
             label="Target Value"
             type="number"
             step="any"
@@ -135,6 +118,14 @@ export function KeyResultModal({ isOpen, onClose, editingKr, form, setForm, onSu
             type="date"
             value={form.target_date}
             onChange={(e) => setForm({ ...form, target_date: e.target.value })}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Estimated Completion Date"
+            type="date"
+            value={form.estimated_completion_date}
+            onChange={(e) => setForm({ ...form, estimated_completion_date: e.target.value })}
           />
         </div>
         <Checkbox

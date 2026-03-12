@@ -3,6 +3,13 @@
 import { Card, Badge, ProgressBar } from '@/src/components/ui';
 import { Objective, KeyResult } from '@/src/types';
 import { calculateProgress, formatValue } from '@/src/lib/utils';
+
+function formatEstCompletion(date: string | null | undefined): string | null {
+  if (!date) return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+}
 import { DepartmentWithObjectives } from '../lib/api';
 
 interface DepartmentCardProps {
@@ -22,9 +29,6 @@ function KRTableRow({ kr, dept }: { kr: KeyResult; dept: DepartmentWithObjective
           {kr.is_top_kr && <Badge variant="warning" className="text-xs">Top KR</Badge>}
         </div>
       </td>
-      <td className="px-4 py-3 text-right text-sm text-[#A0A8C8]">
-        {formatValue(kr.baseline_value, kr.unit_type, kr.baseline_label)}
-      </td>
       <td className="px-4 py-3 text-right text-sm font-medium text-white">
         {formatValue(kr.target_value, kr.unit_type, kr.target_label)}
       </td>
@@ -33,6 +37,14 @@ function KRTableRow({ kr, dept }: { kr: KeyResult; dept: DepartmentWithObjective
       </td>
       <td className="px-4 py-3">
         <ProgressBar value={progress} showLabel size="md" />
+      </td>
+      <td className="px-4 py-3 text-right">
+        {formatEstCompletion(kr.estimated_completion_date)
+          ? <span className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-[#7C3AED]/[0.20] text-[#C4B5FD] border border-[#7C3AED]/[0.40]">
+              {formatEstCompletion(kr.estimated_completion_date)}
+            </span>
+          : <span className="text-sm text-[#4B5280]">—</span>
+        }
       </td>
     </tr>
   );
@@ -49,16 +61,21 @@ function KRMobileCard({ kr, dept }: { kr: KeyResult; dept: DepartmentWithObjecti
       <p className="text-sm text-white mb-3">{kr.title}</p>
       <div className="grid grid-cols-3 gap-2 text-center text-xs mb-2">
         <div>
-          <div className="text-[#6B7394]">Baseline</div>
-          <div className="font-medium text-[#A0A8C8]">{formatValue(kr.baseline_value, kr.unit_type, kr.baseline_label)}</div>
-        </div>
-        <div>
           <div className="text-[#6B7394]">Current</div>
           <div className="font-semibold text-white">{formatValue(kr.current_value, kr.unit_type, kr.current_label)}</div>
         </div>
         <div>
           <div className="text-[#6B7394]">Target</div>
           <div className="font-medium text-white">{formatValue(kr.target_value, kr.unit_type, kr.target_label)}</div>
+        </div>
+        <div>
+          <div className="text-[#6B7394] mb-1">Est. Completion</div>
+          {formatEstCompletion(kr.estimated_completion_date)
+            ? <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-[#7C3AED]/[0.20] text-[#C4B5FD] border border-[#7C3AED]/[0.40]">
+                {formatEstCompletion(kr.estimated_completion_date)}
+              </span>
+            : <span className="text-xs text-[#4B5280]">—</span>
+          }
         </div>
       </div>
       <ProgressBar value={progress} showLabel size="sm" />
@@ -146,10 +163,10 @@ export function DepartmentCard({ dept, isExpanded, onToggle }: DepartmentCardPro
               <thead>
                 <tr className="bg-white/[0.04] text-xs text-[#A0A8C8] uppercase">
                   <th className="text-left px-6 py-3 font-semibold">Objective / Key Result</th>
-                  <th className="text-right px-4 py-3 font-semibold w-28">Baseline</th>
                   <th className="text-right px-4 py-3 font-semibold w-28">Target</th>
                   <th className="text-right px-4 py-3 font-semibold w-28">Current</th>
                   <th className="text-center px-4 py-3 font-semibold w-36">% of Target</th>
+                  <th className="text-right px-4 py-3 font-semibold w-36">Est. Completion</th>
                 </tr>
               </thead>
               <tbody>

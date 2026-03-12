@@ -29,8 +29,6 @@ interface KrForm {
   code: string;
   title: string;
   description: string;
-  baseline_value: string;
-  baseline_label: string;
   target_value: string;
   target_label: string;
   current_value: string;
@@ -38,6 +36,7 @@ interface KrForm {
   unit_type: 'number' | 'currency' | 'percentage';
   direction: 'increase' | 'decrease';
   target_date: string;
+  estimated_completion_date: string;
   is_top_kr: boolean;
 }
 
@@ -75,10 +74,10 @@ export async function saveKeyResult(form: KrForm, objectiveId: number, editingId
       body: JSON.stringify({
         ...form,
         objective_id: objectiveId,
-        baseline_value: form.baseline_value ? parseFloat(form.baseline_value) : null,
         target_value: parseFloat(form.target_value),
         current_value: parseFloat(form.current_value) || 0,
         target_date: form.target_date || null,
+        estimated_completion_date: form.estimated_completion_date || null,
       }),
     });
   } catch (error) {
